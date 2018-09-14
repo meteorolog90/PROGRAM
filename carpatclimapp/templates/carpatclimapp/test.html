@@ -1,0 +1,80 @@
+{% extends 'carpatclimapp/base.html' %}
+
+{% block content %}
+    <h3>Tests</h3>
+    <div>
+        <a href="/carpatclim/simple/"><s>simple</s></a>
+        <code>Error: fname must be a PathLike or file handle</code>
+    </div>
+    <div>
+        <a href="/carpatclim/mplimage.png"><s>example 1</s></a>
+        <code>Error: fname must be a PathLike or file handle</code>
+    </div>
+    <div>
+        <a href="/carpatclim/mplimage2.png">example 2 &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <div>
+        <a href="/carpatclim/sine.png">sine &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <h3>CarpatClim tests</h3>
+
+    <h4>Yearly tests</h4>
+    <div>
+        <a href="/carpatclim/1961/figure.png">1961 map image &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <div>
+        <a href="/carpatclim/1961/">1961 page &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <div>
+        <a href="/carpatclim/1962/figure.png">1962 map image &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <div>
+        <a href="/carpatclim/1962/">1962 page &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <hr>
+
+    <h4>Monthly tests</h4>
+    <div>
+        <a href="/carpatclim/1961/1/figure.png">1961/1 map image &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <div>
+        <a href="/carpatclim/1961/1/">1961/1 page &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <div>
+        <a href="/carpatclim/1961/2/figure.png">1961/2 map image &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <div>
+        <a href="/carpatclim/1961/2/">1961/2 page &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <hr>
+
+    <h4>Daily tests</h4>
+    <div>
+        <a href="/carpatclim/1961/1/1/figure.png">1961/1/1 map image&nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <div>
+        <a href="/carpatclim/1961/1/1/">1961/1/1 page&nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <div>
+        <a href="/carpatclim/1961/1/13/figure.png">1961/2/13 map image&nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    <div>
+        <a href="/carpatclim/1961/1/13/">1961/2/13 page &nbsp &nbsp</a>
+        <span class="glyphicon glyphicon glyphicon-ok"></span>
+    </div>
+    
+    <br>
+{% endblock %}

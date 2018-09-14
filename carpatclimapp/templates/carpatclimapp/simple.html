@@ -1,0 +1,10 @@
+{% extends 'carpatclimapp/base.html' %}
+
+{% block content %}
+    {% if date_path %}
+        <h1>Map</h1>
+        <div>Data for {{ date_path }}:</div>
+        <br>
+        <img src="/carpatclim/{{ date_path }}/figure.png">
+    {% endif %}
+{% endblock %}
