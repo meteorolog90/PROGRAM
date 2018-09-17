@@ -62,8 +62,18 @@ backend : Agg
 
 ##### Copy Climate data files into static/data
 
-##### Test run
-Run django test server with:
+##### Django Test Server run
+Generate secret key
+```bash
+python -c 'import random; import string; print("".join([random.SystemRandom().choice(string.digits + string.ascii_letters + string.punctuation) for i in range(100)]))' > secret_key.txt
+```
+
+Apply database migrations
+```bash
+python manage.py migrate
+```
+
+Run Django test server with:
 ```bash
 python manage.py runserver 0.0.0.0:8000
 ```
@@ -71,7 +81,7 @@ python manage.py runserver 0.0.0.0:8000
 Open 127.0.0.1:8000/carpatclim/ in browser
 
 ## Running the tests
-run tests in tests directory with
+Run tests in tests directory with
 ```bash
 python -m unittest run
 ```
