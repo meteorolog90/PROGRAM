@@ -1,6 +1,6 @@
 from django.urls import path
 from django.conf.urls import url
-from . import views
+from . import views, views_test
 
 
 urlpatterns = [
@@ -12,4 +12,8 @@ urlpatterns = [
     path('<int:year>/<int:month>/', views.carpatclim_m, name='carpatclim_m'),
     path('<int:year>/', views.carpatclim_y, name='carpatclim_y'),
     # test view examples
+    path('test/', views_test.test, name='test'),
+    path('test/simple/', views_test.simple, name='simple'),
+    path('test/mplimage.png', views_test.mplimage, name='mplimage'),
+    path('test/sine.png', views_test.show_sine, name='show_sine'),
 ]

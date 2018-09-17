@@ -4,8 +4,8 @@
         <title>CarpatClim Online App</title>
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-        <link rel="stylesheet" href="{% static 'css/blog.css' %}">
-        <link href="//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="{% static 'css/carpatclimapp.css' %}">
+        <link href="//fonts.googleapis.com/css?family=Ubuntu&subset=latin,latin-ext" rel="stylesheet" type="text/css">
     </head>
     <body>
         <div class="page-header">
@@ -15,7 +15,10 @@
                 <a href="{% url 'login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span></a>
             {% endif%}
             
-            <h1><a href="/carpatclim">CarpatClim Data</a></h1>
+            <h1><a href="/">CarpatClim Data</a></h1>
+            <a href="#">Yearly data</a>
+            <a href="#">Monthly data</a>
+            <a href="#">Daily data</a>
         </div>
 
         <div class="content container">
