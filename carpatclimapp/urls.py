@@ -5,6 +5,9 @@ from . import views, views_test
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('yearly/', views.yearly, name='yearly'),
+    path('monthly/', views.monthly, name='monthly'),
+    path('daily/', views.daily, name='daily'),
     path('<int:year>/<int:month>/<int:day>/figure.png', views.carpatclim_d_figure, name='carpatclim_d_figure'),
     path('<int:year>/<int:month>/figure.png', views.carpatclim_m_figure, name='carpatclim_m_figure'),
     path('<int:year>/figure.png', views.carpatclim_y_figure, name='carpatclim_y_figure'),

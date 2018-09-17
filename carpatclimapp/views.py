@@ -9,25 +9,62 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from .carpatclim import *
-from .forms import CronForm
+from .forms import CronForm, CronFormYearly, CronFormMonthly, CronFormDaily
 # Create your views here.
 
 
 def home(request):
     if request.method == "POST":
-        form = CronForm(request.POST)
+        form = CronFormYearly(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             year = data.get('year')
-            # month = data.get('month')
-            # day = data.get('day')
-            # return redirect('%s/%s/%s/figure.png' % (year, month, day))
-            # return redirect('%s/figure.png' % (year))
             date_path = year
-            # return render(request, 'carpatclimapp/simple.html', {'date_path': date_path})
-            return redirect('/carpatclim/%s/' % (date_path))
+            return redirect('/%s/' % (date_path))
     else:
-        form = CronForm()
+        form = CronFormYearly()
+    return render(request, 'carpatclimapp/home.html', {'form': form})
+
+
+def yearly(request):
+    if request.method == "POST":
+        form = CronFormYearly(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            year = data.get('year')
+            date_path = year
+            return redirect('/%s/' % (date_path))
+    else:
+        form = CronFormYearly()
+    return render(request, 'carpatclimapp/home.html', {'form': form})
+
+
+def monthly(request):
+    if request.method == "POST":
+        form = CronFormMonthly(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            year = data.get('year')
+            month = data.get('month')
+            date_path = year + '/' + month
+            return redirect('/%s/' % (date_path))
+    else:
+        form = CronFormMonthly()
+    return render(request, 'carpatclimapp/home.html', {'form': form})
+
+
+def daily(request):
+    if request.method == "POST":
+        form = CronFormDaily(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            year = data.get('year')
+            month = data.get('month')
+            day = data.get('day')
+            date_path = year
+            return redirect('/%s/' % (date_path))
+    else:
+        form = CronFormDaily()
     return render(request, 'carpatclimapp/home.html', {'form': form})
 
 

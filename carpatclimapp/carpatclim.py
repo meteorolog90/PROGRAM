@@ -186,6 +186,7 @@ def test():
 
 def data_preload():
     """ Preload data """
+
     LOGGER.info('Preload GRID file.')
     global GRID
     GRID = load_grid(GRID_FILE)
@@ -194,13 +195,13 @@ def data_preload():
     global DF_Y
     DF_Y = load_data(CLIMATE_FILE_Y)
 
-    # LOGGER.info('Preload monthly climate data file.')
-    # global DF_M
-    # DF_M = load_data(CLIMATE_FILE_M)
+    LOGGER.info('Preload monthly climate data file.')
+    global DF_M
+    DF_M = load_data(CLIMATE_FILE_M)
 
-    # LOGGER.info('Preload daily climate data file.')
-    # global DF_D
-    # DF_D = load_data(CLIMATE_FILE_D)
+    LOGGER.info('Preload daily climate data file.')
+    global DF_D
+    DF_D = load_data(CLIMATE_FILE_D)
 
     LOGGER.info('Preload finished.')
     
