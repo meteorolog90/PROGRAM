@@ -78,7 +78,7 @@ Run Django test server with:
 python manage.py runserver 0.0.0.0:8000
 ```
 
-Open 127.0.0.1:8000/carpatclim/ in browser
+Open 127.0.0.1:8000/ in browser
 
 ## Running the tests
 Run tests in tests directory with
