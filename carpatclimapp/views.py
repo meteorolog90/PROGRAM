@@ -23,7 +23,8 @@ def home(request):
             return redirect('/%s/' % (date_path))
     else:
         form = CronFormYearly()
-    return render(request, 'carpatclimapp/home.html', {'form': form})
+        active_yearly = True
+    return render(request, 'carpatclimapp/home.html', {'form': form, 'active_yearly': active_yearly})
 
 
 def yearly(request):
@@ -36,7 +37,8 @@ def yearly(request):
             return redirect('/%s/' % (date_path))
     else:
         form = CronFormYearly()
-    return render(request, 'carpatclimapp/home.html', {'form': form})
+        active_yearly = True
+    return render(request, 'carpatclimapp/home.html', {'form': form, 'active_yearly': active_yearly})
 
 
 def monthly(request):
@@ -46,11 +48,12 @@ def monthly(request):
             data = form.cleaned_data
             year = data.get('year')
             month = data.get('month')
-            date_path = year + '/' + month
-            return redirect('/%s/' % (date_path))
+            date_path = '/%s/%s/' % (year, month)
+            return redirect(date_path)
     else:
         form = CronFormMonthly()
-    return render(request, 'carpatclimapp/home.html', {'form': form})
+        active_monthly = True
+    return render(request, 'carpatclimapp/home.html', {'form': form, 'active_monthly': active_monthly})
 
 
 def daily(request):
@@ -61,11 +64,12 @@ def daily(request):
             year = data.get('year')
             month = data.get('month')
             day = data.get('day')
-            date_path = year
-            return redirect('/%s/' % (date_path))
+            date_path = '/%s/%s/%s/' % (year, month, day)
+            return redirect(date_path)
     else:
         form = CronFormDaily()
-    return render(request, 'carpatclimapp/home.html', {'form': form})
+        active_daily = True
+    return render(request, 'carpatclimapp/home.html', {'form': form, 'active_daily': active_daily})
 
 
 def carpatclim_y_figure(request, year):

@@ -16,9 +16,24 @@
             {% endif%}
             
             <h1><a href="/">CarpatClim Data</a></h1>
-            <a href="/yearly">Yearly data</a>
-            <a href="/monthly">Monthly data</a>
-            <a href="/daily">Daily data</a>
+
+            {% if active_yearly %}
+                <a href="/yearly" class="active">Yearly data</a>
+            {% else %}
+                <a href="/yearly">Yearly data</a>
+            {% endif %}
+
+            {% if active_monthly %}
+                <a href="/monthly" class="active">Monthly data</a>
+            {% else %}
+                <a href="/monthly">Monthly data</a>
+            {% endif %}
+
+            {% if active_daily %}
+                <a href="/daily" class="active">Daily data</a>
+            {% else %}
+                <a href="/daily">Daily data</a>
+            {% endif %}
         </div>
 
         <div class="content container">
