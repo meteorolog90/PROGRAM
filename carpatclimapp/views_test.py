@@ -8,7 +8,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.dates import DateFormatter
 from matplotlib import pylab
-from pylab import *
+# import pylab
 import PIL, PIL.Image
 
 from django.http import HttpResponse
@@ -22,7 +22,7 @@ def test(request):
 
 def simple(request):
     """
-    Matplot image view example
+    Matplot image view simple example
 
     From tutorial:
     https://scipy-cookbook.readthedocs.io/items/Matplotlib_Django.html
@@ -43,41 +43,19 @@ def simple(request):
     fig.autofmt_xdate()
     canvas = FigureCanvas(fig)
 
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    plt.close(fig)
-    # fig.clear()
+    buffer = io.BytesIO()
+    canvas = FigureCanvas(fig)
+    canvas.print_png(buffer)
 
-    response = HttpResponse(content_type='image/png')
+    response = HttpResponse(buffer.getvalue(), content_type='image/png')
 
     # I recommend to add Content-Length for Django
     response['Content-Length'] = str(len(response.content))
 
-    canvas.print_png(response)
     return response
 
 
 def mplimage(request):
-    """
-    Matplot image view simple example 2
-    
-    https://stackoverflow.com/questions/45460145/how-to-render-a-matplotlib-plot-in-a-django-web-application
-    """
-
-    fig = Figure()
-    canvas = FigureCanvas(fig)
-
-    ax = fig.add_subplot(111)
-    x = np.arange(-2,1.5,.01)
-    y = np.sin(np.exp(2*x))
-    ax.plot(x, y)
-
-    response = HttpResponse(content_type='image/png')
-    canvas.print_png(response)
-    return response
-
-
-def mplimage2(request):
     """
     Matplot image view simple example 2
 
@@ -107,21 +85,22 @@ def mplimage2(request):
     return response
 
 
-def showimage(request):
+def show_sine(request):
     """
     Sine graph
 
-    URL: ??
+    URL: https://www.eriksmistad.no/making-charts-and-outputing-them-as-images-to-the-browser-in-django/
+    https://matplotlib.org/examples/pylab_examples/pythonic_matplotlib.html
     """
     # Construct the graph
-    t = arange(0.0, 2.0, 0.01)
-    s = sin(2*pi*t)
-    plot(t, s, linewidth=1.0)
+    t = np.arange(0.0, 2.0, 0.01)
+    s = np.sin(2*np.pi*t)
+    plt.plot(t, s, linewidth=1.0)
  
-    xlabel('time (s)')
-    ylabel('voltage (mV)')
-    title('About as simple as it gets, folks')
-    grid(True)
+    plt.xlabel('time (s)')
+    plt.ylabel('voltage (mV)')
+    plt.title('About as simple as it gets, folks')
+    plt.grid(True)
  
     # Store image in a string buffer
     buffer = io.BytesIO()
