@@ -43,6 +43,7 @@ python -m pip install --upgrade pip
 
 ```bash
 pip install -f requirements.txt
+pip install cartopy
 ```
 
 or with conda:
