@@ -9,7 +9,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from .carpatclim import *
-from .forms import CronForm, CronFormYearly, CronFormMonthly, CronFormDaily
+from .forms import CronFormYearly, CronFormMonthly, CronFormDaily
 # Create your views here.
 
 

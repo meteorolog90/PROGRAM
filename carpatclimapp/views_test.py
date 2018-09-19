@@ -8,8 +8,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.dates import DateFormatter
 from matplotlib import pylab
-# import pylab
-import PIL, PIL.Image
+
 
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -73,6 +72,8 @@ def mplimage(request):
     ax.plot(x, y)
 
     canvas = FigureCanvas(fig)
+
+    # Store image in a string buffer
     canvas.print_png(buffer)
 
     response = HttpResponse(buffer.getvalue(), content_type='image/png')
@@ -92,23 +93,33 @@ def show_sine(request):
     URL: https://www.eriksmistad.no/making-charts-and-outputing-them-as-images-to-the-browser-in-django/
     https://matplotlib.org/examples/pylab_examples/pythonic_matplotlib.html
     """
+
+    fig = Figure()
+    buffer = io.BytesIO()
+    ax = fig.add_subplot(111)
+    
     # Construct the graph
     t = np.arange(0.0, 2.0, 0.01)
     s = np.sin(2*np.pi*t)
-    plt.plot(t, s, linewidth=1.0)
+
+    ax.plot(t, s, linewidth=1.0)
+    ax.set_xlabel('time (s)')
+    ax.set_ylabel('voltage (mV)')
+    ax.set_title('Sine signal')
+    ax.grid(True)
+    ax.plot(t, s)
  
-    plt.xlabel('time (s)')
-    plt.ylabel('voltage (mV)')
-    plt.title('About as simple as it gets, folks')
-    plt.grid(True)
- 
+    canvas = FigureCanvas(fig)
+
     # Store image in a string buffer
-    buffer = io.BytesIO()
-    canvas = pylab.get_current_fig_manager().canvas
-    canvas.draw()
-    pilImage = PIL.Image.frombytes("RGB", canvas.get_width_height(), canvas.tostring_rgb())
-    pilImage.save(buffer, "PNG")
-    pylab.close()
- 
+    canvas.print_png(buffer)
+    
+    response = HttpResponse(buffer.getvalue(), content_type='image/png')
+    # I recommend to add Content-Length for Django
+    response['Content-Length'] = str(len(response.content))
+
+    # if required clear the figure for reuse
+    fig.clear()
+
     # Send buffer in a http response the the browser with the mime type image/png set
-    return HttpResponse(buffer.getvalue(), content_type="image/png")
+    return response
