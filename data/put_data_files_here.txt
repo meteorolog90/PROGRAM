@@ -1,0 +1,6 @@
+Directory for:
+CARPATGRID_TA_D.ser
+CARPATGRID_TA_M.ser
+CARPATGRID_TA_Y.ser
+PredtandfilaGrid.dat
+carpatclim.sqlite3

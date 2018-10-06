@@ -5,6 +5,7 @@
 
 import os
 import logging
+import sqlite3
 import pandas as pd
 import numpy as np
 import cartopy.crs as ccrs
@@ -20,198 +21,163 @@ LOGGER = logging.getLogger(__name__)
 
 APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-DATA_DIR = APP_DIR + os.sep + 'static' + os.sep + 'data'
+DATA_DIR = os.path.join(APP_DIR, 'data')
 if not os.path.exists(DATA_DIR):
     os.mkdir(DATA_DIR)
 
-IMAGES_DIR = DATA_DIR + os.sep + 'images'
+IMAGES_DIR = os.path.join(DATA_DIR, 'images')
 if not os.path.exists(IMAGES_DIR):
     os.mkdir(IMAGES_DIR)
 
-#   0.20 MB, 5 columns, 5895 rows
-GRID_FILE = DATA_DIR + os.sep + 'PredtandfilaGrid.dat'
-#   3.15 MB, 5895 columns, 51 rows
-CLIMATE_FILE_Y = DATA_DIR + os.sep + 'CARPATGRID_TA_Y.ser'
-#  37.10 MB, 5895 columns, 601 rows
-CLIMATE_FILE_M = DATA_DIR + os.sep + 'CARPATGRID_TA_M.ser'
-# 821.00 MB, 5895 columns, 18236 rows
-CLIMATE_FILE_D = DATA_DIR + os.sep + 'CARPATGRID_TA_D.ser'
-
-
-def load_data(filename):
-    """
-    Load daily climate data from file
-
-    Use ../data directory
-    returns pandas DataFrame
-    """
-
-    LOGGER.info('Reading file: %s.', filename)
-    df_ = pd.read_csv(filename, sep=r'\s+')
-    LOGGER.info('%d rows and %d columns read.', len(df_), len(df_.columns))
-
-    return df_
-
-
-def load_grid(filename):
-    """
-    Load grid map
-
-    format: index, lon, lat, country, altitude
-    returns pandas DataFrame
-    """
-
-    LOGGER.info('Grid file is: %s.', filename)
-    df_grid = load_data(filename)
-    LOGGER.info('Set index column for grid DataFrame.')
-    df_grid.set_index('index', inplace=True)
-
-    return df_grid
+DB_FILE = 'carpatclim.sqlite3'
+DB = os.path.join(DATA_DIR, DB_FILE)
 
 
 def file_exists(filename):
-    """ Check if file exists and return boolean """
-    
-    try:
-        return os.path.exists(filename)
-    except:
-        return False
+    """ Check if file exists and return path or False"""
+
+    return os.path.exists(filename)
 
 
 def create_mapname(year, month=None, day=None):
     """
-    Creates mapname string from date string inputs 
-    
+    Creates mapname string from date string inputs
+
     Returns eg '1961-2-1', '1961-2', '1961'
     """
-    l = [year, month, day]
-    # Filter input values, if none, dropit
-    m = list(filter(lambda x: x != None, l))
+    temp_l = [year, month, day]
+    # Filter input values, if none, drop it
+    temp_m = list(filter(lambda x: x != None, temp_l))
     # convert numbers to string and join
-    result = '-'.join(list(map(lambda x: str(x), m)))
-    LOGGER.debug('Mapname is %s.' % result)
+    result = '-'.join(list(map(str, temp_m)))
+    LOGGER.debug('Mapname is %s.', result)
     return result
 
 
-def save_map(map, mapname):
-    """ Saves map to filename """
+def save_map(fig, mapname):
+    """
+    Saves map figure to filename
+
+    returns path to filename
+    """
 
     filename = mapname + '.png'
-    file_path = IMAGES_DIR + os.sep + filename
+    file_path = os.path.join(IMAGES_DIR, filename)
     if file_exists(file_path):
-        LOGGER.info('Map %s already exists.' % filename)
-        return file_path 
-    LOGGER.info('Saving map %s.' % filename)
-    map.savefig(file_path, bbox_inches='tight')
-    LOGGER.info('Map %s saved.' % filename)
+        LOGGER.info('Map figure %s already exists.', filename)
+        return file_path
+    LOGGER.info('Saving map figure %s.', filename)
+    fig.savefig(file_path, bbox_inches='tight')
+    LOGGER.info('Map figure %s saved.', filename)
     return file_path
 
 
 def create_map(year, month=None, day=None):
     """
     Create map for given moment
-    
-    return full path to create image
+
+    return figure
     """
-    
-    LOGGER.info('create_map() started.')
-    
+
+    LOGGER.info('Create map.')
+
+    LOGGER.debug('Connect to DB %s.', DB_FILE)
+    conn = sqlite3.connect(DB)
+    LOGGER.debug('Get a cursor object.')
+    cursor = conn.cursor()
+
     mapname = create_mapname(year, month, day)
-    LOGGER.debug('Map name is %s.' % mapname)
-    
+    LOGGER.debug('Map name is %s.', mapname)
+
     if day:
-        result_df = DF_D.loc[year, month, day]
+        table = 'daily'
     elif month:
-        result_df = DF_M.loc[year, month]
+        table = 'monthly'
     elif year:
-        result_df = DF_Y.loc[year]
+        table = 'yearly'
 
-    LOGGER.info('Prepare grid cooardinates.')
+    query = '''
+        SELECT dates, cell, temp FROM %s WHERE dates = "%s";
+        ''' % (table, mapname)
+
+    LOGGER.debug('SQL query: %s.', query)
+    result_df = pd.read_sql_query(query, conn, index_col='dates')
+    result_df = result_df['temp']
+
+    LOGGER.debug('Prepare grid cooardinates.')
+    LOGGER.debug('Apply Albers Equal Area projection.')
     to_proj = ccrs.AlbersEqualArea(central_longitude=-1., central_latitude=10.)
-    lat = GRID['lat'].values
-    lon = GRID['lon'].values
-    xp, yp, _ = to_proj.transform_points(ccrs.Geodetic(), lon, lat).T
+    LOGGER.debug('Albers Equal Area projection applied.')
 
-    LOGGER.info('Prepearing map %s.' % mapname)
-    x_masked, y_masked, t = remove_nan_observations(xp, yp, result_df.values)
-    tempx, tempy, temp = interpolate_to_grid(x_masked, y_masked, t, interp_type='barnes',
-                                 minimum_neighbors=8, search_radius=150000, hres=10000)
+    query = '''SELECT id, lon, lat FROM %s;''' % 'grid'
+    LOGGER.debug('SQL query: %s', query)
+    grid = pd.read_sql_query(query, conn, index_col='id')
 
+    cursor.close()
+    conn.close()
+
+    lon = grid['lon'].values
+    lat = grid['lat'].values
+
+    LOGGER.debug('Begin transformation to Geodetic coordinate system.')
+    xp_, yp_, _ = to_proj.transform_points(ccrs.Geodetic(), lon, lat).T
+    LOGGER.debug('Transform to Geodetic coordinate system completed.')
+
+    LOGGER.debug('Remove NaNs.')
+    x_masked, y_masked, temps = remove_nan_observations(
+        xp_, yp_, result_df.values)
+    LOGGER.debug('NaNs removed.')
+
+    LOGGER.debug('Interpolate to grid.')
+    tempx, tempy, temp = interpolate_to_grid(
+        x_masked, y_masked, temps, interp_type='barnes',
+        minimum_neighbors=8, search_radius=150000, hres=10000)
+
+    LOGGER.debug('Interpolated to grid.')
+
+    LOGGER.debug('Apply mask for NaNs.')
     temp = np.ma.masked_where(np.isnan(temp), temp)
+    LOGGER.debug('Mask applied.')
 
+    LOGGER.debug('Create map figure %s.', mapname)
     levels = list(range(-20, 20, 1))
+    # use viridis colormap
     cmap = plt.get_cmap('viridis')
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
-
+    # TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
     fig = plt.figure(figsize=(20, 10))
-    view = fig.add_subplot(1, 1, 1, projection=to_proj)
 
+    LOGGER.debug('Add projection to figure.')
+    view = fig.add_subplot(1, 1, 1, projection=to_proj)
+    LOGGER.debug('Projection added.')
+
+    LOGGER.debug('Add map features to figure.')
     view.set_extent([27.0, 16.9, 49.5, 44.5])
     view.add_feature(cfeature.STATES.with_scale('50m'))
     view.add_feature(cfeature.OCEAN)
     view.add_feature(cfeature.COASTLINE.with_scale('50m'))
     view.add_feature(cfeature.BORDERS, linestyle=':')
+    LOGGER.debug('Map features added.')
 
+    # make colorbar legend for figure
     mmb = view.pcolormesh(tempx, tempy, temp, cmap=cmap, norm=norm)
     fig.colorbar(mmb, shrink=.4, pad=0.02, boundaries=levels)
     view.set_title('Srednja temperatura')
 
-    # decrease borders
-    fig.tight_layout()
+    # TODO: decrease borders, check does it works??
+    # fig.tight_bbox()
+    # fig.savefig(mapname + '.png', bbox_inches='tight')
+    LOGGER.info('Map figure %s created.', (mapname))
 
-    LOGGER.info('Map %s created.' % (mapname))
+    plt.close('all')
+
     return fig
 
 
-def test():
-    """ test function"""
-    LOGGER.info('CarpatClim test started.')
-
-    year = 1961
-    map = create_map(year)
-    save_map(map, create_mapname(year, month))
-
-    year = 1961
-    month = 1
-    map = create_map(year, month)
-    save_map(map, create_mapname(year, month))
-
-    year = 1961
-    month = 2
-    map = create_map(year, month)
-    save_map(map, create_mapname(year, month))
-    
-    LOGGER.info('CarpatClim test finished.')
-
-
-def data_preload():
-    """ Preload data """
-
-    LOGGER.info('Preload GRID file.')
-    global GRID
-    GRID = load_grid(GRID_FILE)
-    
-    LOGGER.info('Preload yearly climate data file.')
-    global DF_Y
-    DF_Y = load_data(CLIMATE_FILE_Y)
-
-    LOGGER.info('Preload monthly climate data file.')
-    global DF_M
-    DF_M = load_data(CLIMATE_FILE_M)
-
-    LOGGER.info('Preload daily climate data file.')
-    global DF_D
-    DF_D = load_data(CLIMATE_FILE_D)
-
-    LOGGER.info('Preload finished.')
-    
-
 def main():
+    """Main function"""
     print('Use it as helper module.')
 
 
 if __name__ == '__main__':  # pragma: no cover
     main()
-else:
-    data_preload()
-
