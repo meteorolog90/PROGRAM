@@ -14,7 +14,11 @@ pip install cartopy
 
 or with conda:
 ```bash
-conda install -n carpatclim --file requirements_conda.txt
+conda create --name carpatclim python=3.6.4
+conda install --channel anaconda --name carpatclim geos==3.6.2
+conda install --channel anaconda --name carpatclim shapely==1.6.4
+conda install --channel conda-forge --name carpatclim metpy==0.9.1
+conda install --name carpatclim --file requirements_conda.txt
 ```
 
 ##### Copy Climate data files into data directory:
