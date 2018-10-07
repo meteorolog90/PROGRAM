@@ -4,14 +4,12 @@ Display climate data for given location or whole area in given time
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
 See deployment for notes on how to deploy the project on a live system.
 
 #### Prerequisites
 - python 3.6.5 (3.5.2 works also)
 
-- Cartopy dependencies:
+- Cartopy and dependencies:
 * [proj4](https://proj4.org/install.html#install)
 
 ```bash
@@ -22,76 +20,11 @@ sudo apt-get install libproj-dev proj-data proj-bin
 sudo apt-get install libgeos-dev
 ```
 
-
-Climate Data files:
-```
-CARPATGRID_TA_D.ser
-CARPATGRID_TA_M.ser
-CARPATGRID_TA_Y.ser
-PredtandfilaGrid.dat
-```
-
-
-### Installing
-Create python virtual enviroment and activate it. Update pip if needed.
-```bash
-python -m pip install --upgrade pip
-```
-
-
-##### Install python packages:
-
-```bash
-pip install -f requirements.txt
-pip install cartopy
-```
-
-or with conda:
-```bash
-conda install -n carpatclim --file requirements_conda.txt
-```
-
-##### Matplotlib
-Force matplotlib to not use any Xwindows backend. Set backend to Agg in matplotlib rc file.
-```bash
-python -c "import matplotlib; print(matplotlib.matplotlib_fname())"
-vi ./myvenv/lib/python3.5/site-packages/matplotlib/mpl-data/matplotlibrc
-```
-```
-backend : Agg
-```
-
-##### Copy Climate data files into static/data
-
-##### Django Test Server run
-Generate secret key
-```bash
-python -c 'import random; import string; print("".join([random.SystemRandom().choice(string.digits + string.ascii_letters + string.punctuation) for i in range(100)]))' > secret_key.txt
-```
-
-Apply database migrations
-```bash
-python manage.py migrate
-```
-
-Run Django test server with:
-```bash
-python manage.py runserver 0.0.0.0:8000
-```
-
-Open 127.0.0.1:8000/ in browser
-
-## Running the tests
-Run tests in tests directory with
-```bash
-python -m unittest run
-```
-
 ## TODO
 - [ ] Fetch climate data for specific coordinates and time
 
 ## Deployment
-Add additional notes about how to deploy this on a live system
+Additional notes about how to deploy this on a live system are [here](docs/install.md)
 
 ## Built With
 
