@@ -8,7 +8,7 @@ python -m pip install --upgrade pip
 ##### Install python packages:
 
 ```bash
-pip install -f requirements.txt
+pip install -r requirements.txt
 pip install cartopy
 ```
 
