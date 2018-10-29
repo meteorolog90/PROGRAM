@@ -1,0 +1,41 @@
+{% extends 'carpatclimapp/base.html' %}
+
+{% block content %}
+
+    <div>
+            
+        
+        <form method="POST" class="post-form">{% csrf_token %}
+                   
+            <p>Data for cordinates:</p>
+            {{ form.as_p }}
+            <div> 
+                <div class ="panel-body">{{point}}</div>
+            </div>
+            {% comment %} <button class="btn btn-primary btn-sm" value="Download data" type="submit">Download data</button> {% endcomment %}
+            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+
+            <!-- <select name="lat_select">
+                <option value={{lat}}>lat</option>
+                
+            </select>
+            
+
+            <select name="lon_select">
+                <option value={{lon}}>lon</option>
+                
+            </select>
+             -->
+                    
+                  
+
+        </form>
+       
+               
+
+        
+    </div>
+
+
+
+{% endblock %}

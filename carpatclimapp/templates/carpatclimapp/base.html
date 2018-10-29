@@ -6,9 +6,11 @@
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
         <link rel="stylesheet" href="{% static 'css/carpatclimapp.css' %}">
         <link href="//fonts.googleapis.com/css?family=Ubuntu&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+        
     </head>
     <body>
         <div class="page-header">
+            
             {% if user.is_authenticated %}
                 <p class="top-menu">Hello, {{ user.username }} {{ user.pk }}<small>(<a href="{% url 'logout' %}">Logout</a>)</small></p>
             {% else %}
@@ -34,8 +36,14 @@
             {% else %}
                 <a href="/daily">Daily data</a>
             {% endif %}
-        </div>
 
+            {% if active_cordinates %}
+                <a href="/cordinates" class="active">Points data</a>
+            {% else %}
+                <a href="/cordinates">Points data</a>
+            {%endif%}
+        </div>
+<!-- ovo nam treba za prikaz forme kod odabira podataka -->
         <div class="content container">
             <div class="row">
                 <div class="col-md-8">

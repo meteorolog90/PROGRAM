@@ -1,15 +1,17 @@
 from io import BytesIO
 from base64 import b64encode
+from io import StringIO
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django.utils.html import escape
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from .carpatclim import *
-from .forms import CronFormYearly, CronFormMonthly, CronFormDaily
+from .forms import CronFormYearly, CronFormMonthly, CronFormDaily, CronFormCord
 # Create your views here.
 
 
@@ -25,6 +27,20 @@ def home(request):
         form = CronFormYearly()
         active_yearly = True
     return render(request, 'carpatclimapp/home.html', {'form': form, 'active_yearly': active_yearly})
+
+def cordinates(request):
+    if request.method == "POST":
+        form = CronFormCord(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            lat = data.get('lat')
+            lon = data.get('lon')
+            cord = '/%s/%s/'%(lat,lon)
+            return redirect(cord)
+    else:
+        form = CronFormCord()
+        active_cordinates = True
+    return render(request, 'carpatclimapp/cordinates.html', {'form': form, 'active_cordinates': active_cordinates})
 
 
 def yearly(request):
@@ -84,6 +100,29 @@ def carpatclim_y_figure(request, year):
     response['Content-Length'] = str(len(response.content))
     return response
 
+
+
+
+def carpatclim_point(request,lat,lon):
+
+    point = cordinates_point(lat,lon)
+    args ={'point':point}
+      
+    return render(request, 'carpatclimapp/cordinates.html',args)
+
+
+
+
+def download_y(request, year):
+
+    output = download_data(year)
+    # buf = StringIO()
+    
+
+    args = {'output':output}
+    return render(request,'carpatoclimapp/download.html',args)
+    
+    
 
 def carpatclim_m_figure(request, year, month):
     """year/month map image"""

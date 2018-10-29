@@ -131,7 +131,7 @@ def create_map(year, month=None, day=None):
     LOGGER.debug('Interpolate to grid.')
     tempx, tempy, temp = interpolate_to_grid(
         x_masked, y_masked, temps, interp_type='barnes',
-        minimum_neighbors=8, search_radius=150000, hres=10000)
+        minimum_neighbors=3, search_radius=150000, hres=10000)
 
     LOGGER.debug('Interpolated to grid.')
 
@@ -145,7 +145,7 @@ def create_map(year, month=None, day=None):
     cmap = plt.get_cmap('viridis')
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
     # TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
-    fig = plt.figure(figsize=(20, 10))
+    fig = plt.figure(figsize=(10, 8))
 
     LOGGER.debug('Add projection to figure.')
     view = fig.add_subplot(1, 1, 1, projection=to_proj)
@@ -172,6 +172,53 @@ def create_map(year, month=None, day=None):
     plt.close('all')
 
     return fig
+
+def cordinates_point(lat,lon):
+
+    conn = sqlite3.connect(DB)
+    cursor = conn.cursor()
+
+    query = '''SELECT lon,lat,country,altitude FROM %s;''' %'grid'
+
+    grid = pd.read_sql_query(query,conn,index_col= ['lat','lon'])
+
+    cursor.close()
+    conn.close()
+
+    out = grid.loc[lat,lon]
+
+    return out
+
+def download_data(year, month=None, day=None):
+    
+    
+    conn = sqlite3.connect('carpatclim.sqlite3')
+    cursor = conn.cursor()
+
+    mapname = create_mapname(year, month, day)
+
+   
+
+    if day:
+        table = 'daily'
+    elif month:
+        table = 'monthly'
+    elif year:
+        table = 'yearly'
+    
+    query = '''
+        SELECT dates, temp FROM %s WHERE dates = "%s";
+        ''' % (table, mapname)
+
+    
+    result_df = pd.read_sql_query(query, conn, index_col='dates')
+    
+    cursor.close()
+    conn.close()
+
+    return result_df
+    
+    
 
 
 def main():

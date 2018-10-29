@@ -1,14 +1,32 @@
 {% extends 'carpatclimapp/base.html' %}
 
 {% block content %}
+
     <div>
-        <p>Map image for date:</p>
-        <form method="POST" class="post-form">{% csrf_token %}
-            {{ form.as_p }}
             
+        
+        <form method="POST" class="post-form">{% csrf_token %}
+                   
+            <p>Data for cordinates:</p>
+            {{ form.as_p }}
+            <div> 
+                <div class ="panel-body">{{output}}</div>
+            </div>
             <button class="btn btn-primary btn-sm" value="Download data" type="submit">Download data</button>
-            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+
+            
+            
+            
+                    
+                  
 
         </form>
+       
+               
+
+        
     </div>
+
+
+
 {% endblock %}
