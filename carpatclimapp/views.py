@@ -103,12 +103,13 @@ def carpatclim_y_figure(request, year):
 
 
 
-def carpatclim_point(request,lat,lon):
-
-    point = cordinates_point(lat,lon)
-    args ={'point':point}
+def carpatclim_point(request, lat, lon):
+    lat = float(lat)
+    lon = float(lon)
+    point = cordinates_point(lat, lon)
+    args ={'point' : point}
       
-    return render(request, 'carpatclimapp/cordinates.html',args)
+    return render(request, 'carpatclimapp/cordinates.html', args)
 
 
 
