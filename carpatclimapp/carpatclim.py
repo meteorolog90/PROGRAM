@@ -145,7 +145,7 @@ def create_map(year, month=None, day=None):
     cmap = plt.get_cmap('viridis')
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
     # TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
-    fig = plt.figure(figsize=(20, 10))
+    fig = plt.figure(figsize=(10, 8))
 
     LOGGER.debug('Add projection to figure.')
     view = fig.add_subplot(1, 1, 1, projection=to_proj)
@@ -173,6 +173,22 @@ def create_map(year, month=None, day=None):
 
     return fig
 
+def cordinates_point(lat,lon):
+
+    conn = sqlite3.connect(DB)
+    cursor = conn.cursor()
+
+    query = '''SELECT lon,lat,country,altitude FROM %s;''' %'grid'
+
+    grid = pd.read_sql_query(query,conn,index_col= ['lat','lon'])
+    out = grid.loc[lat,lon]
+
+
+    cursor.close()
+    conn.close()
+
+
+    return out
 
 def main():
     """Main function"""

@@ -6,6 +6,8 @@
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
         <link rel="stylesheet" href="{% static 'css/carpatclimapp.css' %}">
         <link href="//fonts.googleapis.com/css?family=Ubuntu&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+        <link rel="shortcut icon" type="image/x-icon" href="{% static '/images/favicon.ico' %}"/>
+
     </head>
     <body>
         <div class="page-header">
@@ -15,7 +17,7 @@
                 <a href="{% url 'login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span></a>
             {% endif%}
             
-            <h1><a href="/">CarpatClim Data</a></h1>
+            <center><h1><a href="/">CarpatClim Data</a></h1></center>
 
             {% if active_yearly %}
                 <a href="/yearly" class="active">Yearly data</a>
@@ -33,6 +35,18 @@
                 <a href="/daily" class="active">Daily data</a>
             {% else %}
                 <a href="/daily">Daily data</a>
+            {% endif %}
+
+            {% if active_cordinates %}
+                <a href="/cordinates" class="active">Points data</a>
+            {% else %}
+                <a href="/cordinates">Points data</a>
+            {%endif%}
+
+            {% if weather %}
+                <a href="/weather" class="active">Weather data</a>
+            {% else %}
+                <a href="/weather">Weather data</a>
             {% endif %}
         </div>
 

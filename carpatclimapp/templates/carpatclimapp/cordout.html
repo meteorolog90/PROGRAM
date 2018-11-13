@@ -1,0 +1,80 @@
+{% extends 'carpatclimapp/base.html' %}
+
+{% block content %}
+<table class ="table">
+	<thead>
+      <tr>
+    <th>Country: {{point.country}}</th>
+    <th>Altitude: {{point.altitude}}</th>
+    <th>Latitude: {{lat}}</th>
+    <th>Longitude: {{lon}}</th>      
+    </tr>
+    </thead>
+</table>
+
+<div class="container">
+ 
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Country</th>
+        <th>Number</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+      
+     
+       
+      </tr>
+      <tr class="info">
+        <td>Hungary</td>
+        <td>1</td>
+        
+      </tr>
+
+       <tr class="info">                                
+        <td>Serbia</td>
+        <td>2</td>
+        </tr>
+
+      <tr class="info">
+        <td>Romania</td>
+        <td>3</td>
+        
+      </tr>
+      <tr class="info">
+        <td>Ukraine</td>
+        <td>4</td>
+        
+      </tr>
+      <tr class="info">
+        <td>Slovakia</td>
+        <td>5</td>
+   
+       <tr class="info">
+   			<td>Poland</td>
+        	<td>6</td>
+    		</tr>
+
+    	 <tr class="info">
+        <td>Czech Republic</td>
+        <td>7</td>
+        
+      </tr>
+
+       <tr class="info">
+        <td>Croatia</td>
+        <td>8</td>
+        
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+
+{% endblock %}
+
+

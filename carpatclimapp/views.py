@@ -9,7 +9,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from .carpatclim import *
-from .forms import CronFormYearly, CronFormMonthly, CronFormDaily
+from .forms import CronFormYearly, CronFormMonthly, CronFormDaily, CronFormCord
 # Create your views here.
 
 
@@ -71,6 +71,19 @@ def daily(request):
         active_daily = True
     return render(request, 'carpatclimapp/home.html', {'form': form, 'active_daily': active_daily})
 
+def cordinates(request):
+    if request.method == "POST":
+        form = CronFormCord(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            lat = data.get('lat')
+            lon = data.get('lon')
+            cord = '/%s/%s/'%(lat,lon)
+            return redirect(cord)
+    else:
+        form = CronFormCord()
+        active_cordinates = True
+    return render(request, 'carpatclimapp/cordinates.html', {'form': form, 'active_cordinates': active_cordinates})
 
 def carpatclim_y_figure(request, year):
     """View with year map image"""
@@ -112,6 +125,15 @@ def carpatclim_d_figure(request, year, month, day):
     response['Content-Length'] = str(len(response.content))
     return response
 
+def carpatclim_point(request,lat,lon):
+
+    lat = float(lat)
+    lon = float(lon)
+    point = cordinates_point(lat,lon)
+    args = {'point':point, 'lat':lat, 'lon':lon}
+      
+    #return render(request, 'carpatclimapp/cordinates.html',args)
+    return render(request, 'carpatclimapp/cordout.html',args)
 
 def carpatclim_y(request, year):
     """year/month embeded in page"""
