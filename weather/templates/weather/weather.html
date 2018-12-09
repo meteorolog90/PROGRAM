@@ -1,16 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'carpatclimapp/base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.css" />
-</head>
+{% block content %}
+
+
 
 <body>
-    <section class="hero is-primary">
+    <!-- <section class="hero is-primary">
         <div class="hero-body">
             <div class="container">
                 <h1 class="title">
@@ -18,18 +13,21 @@
                 </h1>
             </div>
         </div>
-    </section>
+    </section> -->
     <section class="section">
         <div class="container">
             <div class="columns">
                 <div class="column is-offset-4 is-4">
+
                     <form method="POST">
+                        {% csrf_token %}
                         <div class="field has-addons">
                             <div class="control is-expanded">
-                                <input class="input" type="text" placeholder="City Name">
+                            
+                                {{form.name}}
                             </div>
                             <div class="control">
-                                <button class="button is-info">
+                                <button type="submit" class="btn btn-primary btn-sm">
                                     Add City
                                 </button>
                             </div>
@@ -43,6 +41,7 @@
         <div class="container">
             <div class="columns">
                 <div class="column is-offset-4 is-4">
+                    {%for city_weather in weather_data%}
                     <div class="box">
                         <article class="media">
                             <div class="media-left">
@@ -59,14 +58,15 @@
                                         <br> humidity: {{city_weather.humidity}} %
                                         <br> pressure: {{city_weather.pressures}} mb
                                         <br> temp: {{city_weather.temperature}}° C
-                                        <br> temp_max: {{city_weather.temperature_max}}° C
-                                        <br> temp_min: {{city_weather.temperature_min}}° C
+                                        <!-- <br> temp_max: {{city_weather.temperature_max}}° C
+                                        <br> temp_min: {{city_weather.temperature_min}}° C -->
                                         <br> {{city_weather.description}}
                                     </p>
                                 </div>
                             </div>
                         </article>
                     </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -76,3 +76,7 @@
 </body>
 
 </html>
+
+{% endblock %}
+
+

@@ -72,7 +72,7 @@ def save_map(fig, mapname):
     return file_path
 
 
-def create_map(year, month=None, day=None):
+def create_map(year, inter, month=None, day=None):
     """
     Create map for given moment
 
@@ -128,50 +128,179 @@ def create_map(year, month=None, day=None):
         xp_, yp_, result_df.values)
     LOGGER.debug('NaNs removed.')
 
-    LOGGER.debug('Interpolate to grid.')
-    tempx, tempy, temp = interpolate_to_grid(
-        x_masked, y_masked, temps, interp_type='barnes',
-        minimum_neighbors=8, search_radius=150000, hres=10000)
+    if inter == "natural_neighbor":
 
-    LOGGER.debug('Interpolated to grid.')
+        LOGGER.debug('Interpolate to grid.')
+        tempx, tempy, temp = interpolate_to_grid(
+            x_masked, y_masked, temps, interp_type='natural_neighbor', hres=10000)
 
-    LOGGER.debug('Apply mask for NaNs.')
-    temp = np.ma.masked_where(np.isnan(temp), temp)
-    LOGGER.debug('Mask applied.')
+        LOGGER.debug('Interpolated to grid.')
 
-    LOGGER.debug('Create map figure %s.', mapname)
-    levels = list(range(-20, 20, 1))
+        LOGGER.debug('Apply mask for NaNs.')
+        temp = np.ma.masked_where(np.isnan(temp), temp)
+        LOGGER.debug('Mask applied.')
+
+        LOGGER.debug('Create map figure %s.', mapname)
+        levels = list(range(-20, 20, 1))
+        # use viridis colormap
+        cmap = plt.get_cmap('viridis')
+        norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+        # TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
+        fig = plt.figure(figsize=(10, 8))
+
+        LOGGER.debug('Add projection to figure.')
+        view = fig.add_subplot(1, 1, 1, projection=to_proj)
+        LOGGER.debug('Projection added.')
+
+        LOGGER.debug('Add map features to figure.')
+        view.set_extent([27.0, 17.1, 50, 44.5])
+        view.add_feature(cfeature.BORDERS, linestyle=':')
+        LOGGER.debug('Map features added.')
+
+        # make colorbar legend for figure
+        mmb = view.pcolormesh(tempx, tempy, temp, cmap=cmap, norm=norm)
+        fig.colorbar(mmb, shrink=.4, pad=0.02, boundaries=levels)
+        view.set_title('Srednja temperatura')
+
+        # TODO: decrease borders, check does it works??
+        # fig.tight_bbox()
+        # fig.savefig(mapname + '.png', bbox_inches='tight')
+        LOGGER.info('Map figure %s created.', (mapname))
+
+        plt.close('all')
+
+        return fig
+
+    if inter == "linear":
+
+        LOGGER.debug('Interpolate to grid.')
+        tempx, tempy, temp = interpolate_to_grid(
+            x_masked, y_masked, temps, interp_type='linear', hres=10000)
+
+        LOGGER.debug('Interpolated to grid.')
+
+        LOGGER.debug('Apply mask for NaNs.')
+        temp = np.ma.masked_where(np.isnan(temp), temp)
+        LOGGER.debug('Mask applied.')
+
+        LOGGER.debug('Create map figure %s.', mapname)
+        levels = list(range(-20, 20, 1))
     # use viridis colormap
-    cmap = plt.get_cmap('viridis')
-    norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+        cmap = plt.get_cmap('viridis')
+        norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
     # TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
-    fig = plt.figure(figsize=(10, 8))
+        fig = plt.figure(figsize=(10, 8))
 
-    LOGGER.debug('Add projection to figure.')
-    view = fig.add_subplot(1, 1, 1, projection=to_proj)
-    LOGGER.debug('Projection added.')
+        LOGGER.debug('Add projection to figure.')
+        view = fig.add_subplot(1, 1, 1, projection=to_proj)
+        LOGGER.debug('Projection added.')
 
-    LOGGER.debug('Add map features to figure.')
-    view.set_extent([27.0, 16.9, 49.5, 44.5])
-    view.add_feature(cfeature.STATES.with_scale('50m'))
-    view.add_feature(cfeature.OCEAN)
-    view.add_feature(cfeature.COASTLINE.with_scale('50m'))
-    view.add_feature(cfeature.BORDERS, linestyle=':')
-    LOGGER.debug('Map features added.')
+        LOGGER.debug('Add map features to figure.')
+        view.set_extent([27.0, 17.1, 50, 44.5])
+        
+        view.add_feature(cfeature.BORDERS, linestyle=':')
+        LOGGER.debug('Map features added.')
 
     # make colorbar legend for figure
-    mmb = view.pcolormesh(tempx, tempy, temp, cmap=cmap, norm=norm)
-    fig.colorbar(mmb, shrink=.4, pad=0.02, boundaries=levels)
-    view.set_title('Srednja temperatura')
+        mmb = view.pcolormesh(tempx, tempy, temp, cmap=cmap, norm=norm)
+        fig.colorbar(mmb, shrink=.4, pad=0.02, boundaries=levels)
+        view.set_title('Srednja temperatura')
 
     # TODO: decrease borders, check does it works??
     # fig.tight_bbox()
     # fig.savefig(mapname + '.png', bbox_inches='tight')
-    LOGGER.info('Map figure %s created.', (mapname))
+        LOGGER.info('Map figure %s created.', (mapname))
 
-    plt.close('all')
+        plt.close('all')
 
-    return fig
+        return fig
+
+    if inter == "barnes":
+
+        LOGGER.debug('Interpolate to grid.')
+        tempx, tempy, temp = interpolate_to_grid(
+            x_masked, y_masked, temps, interp_type='barnes', search_radius=80000, hres=10000)
+
+        LOGGER.debug('Interpolated to grid.')
+
+        LOGGER.debug('Apply mask for NaNs.')
+        temp = np.ma.masked_where(np.isnan(temp), temp)
+        LOGGER.debug('Mask applied.')
+
+        LOGGER.debug('Create map figure %s.', mapname)
+        levels = list(range(-20, 20, 1))
+        # use viridis colormap
+        cmap = plt.get_cmap('viridis')
+        norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+        # TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
+        fig = plt.figure(figsize=(10, 8))
+
+        LOGGER.debug('Add projection to figure.')
+        view = fig.add_subplot(1, 1, 1, projection=to_proj)
+        LOGGER.debug('Projection added.')
+
+        LOGGER.debug('Add map features to figure.')
+        view.set_extent([27.0, 17.1, 50, 44.5])
+        view.add_feature(cfeature.BORDERS, linestyle=':')
+        LOGGER.debug('Map features added.')
+
+        # make colorbar legend for figure
+        mmb = view.pcolormesh(tempx, tempy, temp, cmap=cmap, norm=norm)
+        fig.colorbar(mmb, shrink=.4, pad=0.02, boundaries=levels)
+        view.set_title('Srednja temperatura')
+
+        # TODO: decrease borders, check does it works??
+        # fig.tight_bbox()
+        # fig.savefig(mapname + '.png', bbox_inches='tight')
+        LOGGER.info('Map figure %s created.', (mapname))
+
+        plt.close('all')
+
+        return fig
+
+    if inter == "cressman":    
+
+        LOGGER.debug('Interpolate to grid.')
+        tempx, tempy, temp = interpolate_to_grid(
+            x_masked, y_masked, temps, interp_type='cressman',
+            minimum_neighbors=1, search_radius=80000, hres=10000)
+
+        LOGGER.debug('Interpolated to grid.')
+
+        LOGGER.debug('Apply mask for NaNs.')
+        temp = np.ma.masked_where(np.isnan(temp), temp)
+        LOGGER.debug('Mask applied.')
+
+        LOGGER.debug('Create map figure %s.', mapname)
+        levels = list(range(-20, 20, 1))
+        # use viridis colormap
+        cmap = plt.get_cmap('viridis')
+        norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+        # TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
+        fig = plt.figure(figsize=(10, 8))
+
+        LOGGER.debug('Add projection to figure.')
+        view = fig.add_subplot(1, 1, 1, projection=to_proj)
+        LOGGER.debug('Projection added.')
+
+        LOGGER.debug('Add map features to figure.')
+        view.set_extent([27.0, 17.1, 50, 44.5])
+        view.add_feature(cfeature.BORDERS, linestyle=':')
+        LOGGER.debug('Map features added.')
+
+        # make colorbar legend for figure
+        mmb = view.pcolormesh(tempx, tempy, temp, cmap=cmap, norm=norm)
+        fig.colorbar(mmb, shrink=.4, pad=0.02, boundaries=levels)
+        view.set_title('Srednja temperatura')
+
+        # TODO: decrease borders, check does it works??
+        # fig.tight_bbox()
+        # fig.savefig(mapname + '.png', bbox_inches='tight')
+        LOGGER.info('Map figure %s created.', (mapname))
+
+        plt.close('all')
+
+        return fig
 
 def cordinates_point(lat,lon):
 

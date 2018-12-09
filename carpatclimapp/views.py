@@ -19,8 +19,9 @@ def home(request):
         if form.is_valid():
             data = form.cleaned_data
             year = data.get('year')
-            date_path = year
-            return redirect('/%s/' % (date_path))
+            inter = data.get('inter')
+            date_path = '/%s/%s' % (inter,year)
+            return redirect(date_path)
     else:
         form = CronFormYearly()
         active_yearly = True
@@ -33,8 +34,10 @@ def yearly(request):
         if form.is_valid():
             data = form.cleaned_data
             year = data.get('year')
-            date_path = year
-            return redirect('/%s/' % (date_path))
+            inter = data.get('inter')
+            date_path = '/%s/%s'%(inter,year) 
+            return redirect (date_path)
+            
     else:
         form = CronFormYearly()
         active_yearly = True
@@ -48,7 +51,8 @@ def monthly(request):
             data = form.cleaned_data
             year = data.get('year')
             month = data.get('month')
-            date_path = '/%s/%s/' % (year, month)
+            inter = data.get ('inter')
+            date_path = '/%s/%s/%s' % (inter,year,month)
             return redirect(date_path)
     else:
         form = CronFormMonthly()
@@ -64,7 +68,8 @@ def daily(request):
             year = data.get('year')
             month = data.get('month')
             day = data.get('day')
-            date_path = '/%s/%s/%s/' % (year, month, day)
+            inter = data.get ('inter')
+            date_path = '/%s/%s/%s/%s' % (inter,year, month, day)
             return redirect(date_path)
     else:
         form = CronFormDaily()
@@ -85,10 +90,10 @@ def cordinates(request):
         active_cordinates = True
     return render(request, 'carpatclimapp/cordinates.html', {'form': form, 'active_cordinates': active_cordinates})
 
-def carpatclim_y_figure(request, year):
+def carpatclim_y_figure(request, inter, year):
     """View with year map image"""
 
-    map = create_map(year, month=None, day=None)
+    map = create_map(year, inter, month=None, day=None)
     buffer = BytesIO()
     canvas = FigureCanvas(map)
     canvas.print_png(buffer)
@@ -98,10 +103,10 @@ def carpatclim_y_figure(request, year):
     return response
 
 
-def carpatclim_m_figure(request, year, month):
+def carpatclim_m_figure(request,inter, year, month):
     """year/month map image"""
 
-    map = create_map(year, month, day=None)
+    map = create_map(year, inter, month, day=None)
     buffer = BytesIO()
     canvas = FigureCanvas(map)
     canvas.print_png(buffer)
@@ -112,10 +117,10 @@ def carpatclim_m_figure(request, year, month):
     return response
 
 
-def carpatclim_d_figure(request, year, month, day):
+def carpatclim_d_figure(request,inter, year, month, day):
     """year/month/day map image"""
 
-    map = create_map(year, month, day)
+    map = create_map(year, inter, month, day)
     buffer = BytesIO()
     canvas = FigureCanvas(map)
     canvas.print_png(buffer)
@@ -135,26 +140,26 @@ def carpatclim_point(request,lat,lon):
     #return render(request, 'carpatclimapp/cordinates.html',args)
     return render(request, 'carpatclimapp/cordout.html',args)
 
-def carpatclim_y(request, year):
+def carpatclim_y(request,inter, year):
     """year/month embeded in page"""
     
-    date_path = year
+    date_path = '%s/%s' %(inter,year)
 
     return render(request, 'carpatclimapp/simple.html', {'date_path': date_path})
 
 
-def carpatclim_m(request, year, month):
+def carpatclim_m(request,inter, year, month):
     """View with year/month embeded in page"""
     
-    date_path = '%s/%s' % (year, month)
+    date_path = '%s/%s/%s' % (inter, year, month)
 
     return render(request, 'carpatclimapp/simple.html', {'date_path': date_path})
 
 
-def carpatclim_d(request, year, month, day):
+def carpatclim_d(request,inter, year, month, day):
     """View with year/month/day embeded in page"""
     
-    date_path = '%s/%s/%s' % (year, month, day)
+    date_path = '%s/%s/%s/%s' % (inter, year, month, day)
 
     return render(request, 'carpatclimapp/simple.html', {'date_path': date_path})
 

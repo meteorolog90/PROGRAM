@@ -22,5 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('carpatclimapp.urls')),
-    #path('weather/', include('weather.urls')),
+    path('weather/', include('weather.urls')),
 ]
