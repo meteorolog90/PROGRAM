@@ -1,5 +1,6 @@
 from io import BytesIO
 from base64 import b64encode
+import csv
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -20,7 +21,8 @@ def home(request):
             data = form.cleaned_data
             year = data.get('year')
             inter = data.get('inter')
-            date_path = '/%s/%s' % (inter,year)
+            country = data.get('country')
+            date_path = '/%s/%s/%s'%(inter,country,year) 
             return redirect(date_path)
     else:
         form = CronFormYearly()
@@ -35,7 +37,8 @@ def yearly(request):
             data = form.cleaned_data
             year = data.get('year')
             inter = data.get('inter')
-            date_path = '/%s/%s'%(inter,year) 
+            country = data.get('country')
+            date_path = '/%s/%s/%s'%(inter,country,year) 
             return redirect (date_path)
             
     else:
@@ -52,7 +55,8 @@ def monthly(request):
             year = data.get('year')
             month = data.get('month')
             inter = data.get ('inter')
-            date_path = '/%s/%s/%s' % (inter,year,month)
+            country = data.get('country')
+            date_path = '/%s/%s/%s/%s' % (inter,country,year,month)
             return redirect(date_path)
     else:
         form = CronFormMonthly()
@@ -69,7 +73,8 @@ def daily(request):
             month = data.get('month')
             day = data.get('day')
             inter = data.get ('inter')
-            date_path = '/%s/%s/%s/%s' % (inter,year, month, day)
+            country = data.get('country')
+            date_path = '/%s/%s/%s/%s/%s' % (inter,country,year, month, day)
             return redirect(date_path)
     else:
         form = CronFormDaily()
@@ -84,16 +89,18 @@ def cordinates(request):
             lat = data.get('lat')
             lon = data.get('lon')
             cord = '/%s/%s/'%(lat,lon)
+            # broj = data.get('broj')
+            # adresa = '/%s'%(broj)
             return redirect(cord)
     else:
         form = CronFormCord()
         active_cordinates = True
     return render(request, 'carpatclimapp/cordinates.html', {'form': form, 'active_cordinates': active_cordinates})
 
-def carpatclim_y_figure(request, inter, year):
+def carpatclim_y_figure(request,inter,country, year):
     """View with year map image"""
 
-    map = create_map(year, inter, month=None, day=None)
+    map = create_map(year, inter,country, month=None, day=None)
     buffer = BytesIO()
     canvas = FigureCanvas(map)
     canvas.print_png(buffer)
@@ -103,10 +110,10 @@ def carpatclim_y_figure(request, inter, year):
     return response
 
 
-def carpatclim_m_figure(request,inter, year, month):
+def carpatclim_m_figure(request,inter,country, year, month):
     """year/month map image"""
 
-    map = create_map(year, inter, month, day=None)
+    map = create_map(year, inter,country, month, day=None)
     buffer = BytesIO()
     canvas = FigureCanvas(map)
     canvas.print_png(buffer)
@@ -117,10 +124,10 @@ def carpatclim_m_figure(request,inter, year, month):
     return response
 
 
-def carpatclim_d_figure(request,inter, year, month, day):
+def carpatclim_d_figure(request,inter,country, year, month, day):
     """year/month/day map image"""
 
-    map = create_map(year, inter, month, day)
+    map = create_map(year, inter,country, month, day)
     buffer = BytesIO()
     canvas = FigureCanvas(map)
     canvas.print_png(buffer)
@@ -132,34 +139,48 @@ def carpatclim_d_figure(request,inter, year, month, day):
 
 def carpatclim_point(request,lat,lon):
 
+
+#def carpatclim_point(request,broj):
+
+    # response = HttpResponse(content_type='text/csv')
+    # response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+    # writer = csv.writer(response)
+    # writer.writerow(['broj'])
+    #writer.writero#w(['Second row', 'A', 'B', 'C', '"Testing"', "Here's a quote"])
+
     lat = float(lat)
     lon = float(lon)
+    #broj = int(broj)
     point = cordinates_point(lat,lon)
+    #point = cordinates_point(broj)
     args = {'point':point, 'lat':lat, 'lon':lon}
+    #args = {'point':point}#, 'number':number}
       
     #return render(request, 'carpatclimapp/cordinates.html',args)
     return render(request, 'carpatclimapp/cordout.html',args)
+    
+    
 
-def carpatclim_y(request,inter, year):
+def carpatclim_y(request,inter,country, year):
     """year/month embeded in page"""
     
-    date_path = '%s/%s' %(inter,year)
+    date_path = '%s/%s/%s' %(inter,country,year)
 
     return render(request, 'carpatclimapp/simple.html', {'date_path': date_path})
 
 
-def carpatclim_m(request,inter, year, month):
+def carpatclim_m(request,inter,country, year, month):
     """View with year/month embeded in page"""
     
-    date_path = '%s/%s/%s' % (inter, year, month)
+    date_path = '%s/%s/%s/%s' % (inter,country, year, month)
 
     return render(request, 'carpatclimapp/simple.html', {'date_path': date_path})
 
 
-def carpatclim_d(request,inter, year, month, day):
+def carpatclim_d(request,inter,country, year, month, day):
     """View with year/month/day embeded in page"""
     
-    date_path = '%s/%s/%s/%s' % (inter, year, month, day)
+    date_path = '%s/%s/%s/%s/%s' % (inter,country, year, month, day)
 
     return render(request, 'carpatclimapp/simple.html', {'date_path': date_path})
 
