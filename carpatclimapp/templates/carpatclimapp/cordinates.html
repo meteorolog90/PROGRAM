@@ -1,19 +1,17 @@
 {% extends 'carpatclimapp/base.html' %}
 
 {% block content %}
-    <div>
-        <form method="POST" class="post-form">{% csrf_token %}
-                   
-            <p>Data for cordinates:</p>
-            {{ form.as_p }}
-            <!-- <p>country:</p> {{point.country}}<br> 
-            <p>altitude:</p>{{point.altitude}} -->
-            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-
-        </form>
-        <!-- <div> 
-                <p>Country:</p><div class ="panel-body">{{point.country}}</div>
-                <p>Altitude:</p><div class ="panel-body">{{point.altitude}}</div>
-            </div>         -->
+    <!-- <div class="content container-fluid">
+        <div class="row">
+            <div class="col-md-4"> -->
+        		<form method="POST" class="post-form">{% csrf_token %}
+	            	<p>Data for cordinates:</p>
+	            	{{ form.as_p }}
+	            	<button type="submit" class="btn btn-outline-secondary">Submit</button>
+            	</form>
+ <!--        	</div>
+    	</div>
     </div>
+ -->
+   
 {% endblock %}

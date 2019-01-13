@@ -2,12 +2,11 @@
 
 {% block content %}
     <div>
-        <p>Map image for variable and date:</p>
         <form method="POST" class="post-form">{% csrf_token %}
+                   
+            <p> Download data for : </p>
             {{ form.as_p }}
-            <br>
-             <br>
-              
+
             <button type="submit" class="btn btn-outline-secondary">Submit</button>
 
         </form>
