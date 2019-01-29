@@ -1,0 +1,14 @@
+{% extends 'carpatclimapp/base.html' %}
+
+{% block content %}
+    <div>
+        <form method="POST" class="post-form">{% csrf_token %}
+                   
+            <p> Download data for : </p>
+            {{ form.as_p }}
+
+            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+
+        </form>
+    </div>
+{% endblock %}

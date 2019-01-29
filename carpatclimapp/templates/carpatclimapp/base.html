@@ -3,61 +3,153 @@
 <html>
     <head>
         <title>CarpatClim Online App</title>
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <link rel="stylesheet" href="{% static 'css/carpatclimapp.css' %}">
         <link href="//fonts.googleapis.com/css?family=Ubuntu&subset=latin,latin-ext" rel="stylesheet" type="text/css">
         <link rel="shortcut icon" type="image/x-icon" href="{% static '/images/favicon.ico' %}"/>
 
     </head>
-    <body>
-        <div class="page-header">
-            {% if user.is_authenticated %}
-                <p class="top-menu">Hello, {{ user.username }} {{ user.pk }}<small>(<a href="{% url 'logout' %}">Logout</a>)</small></p>
-            {% else %}
-                <a href="{% url 'login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span></a>
-            {% endif%}
-            
-            <center><h1><a href="/">CarpatClim Data</a></h1></center>
 
+<body>
+ 
+<div class="page-header">
+    <center><h1 color="#fafafa grey lighten-5"> CarpatClim Data </h1></center>
+<div class="row">
+  <div class="col-md-12 school-options-dropdown">
+    <div class="dropdown btn-group">
+
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Data interpolate
+        <span class="caret"></span>
+      </button>
+
+      <ul class="dropdown-menu">
+        <li>
             {% if active_yearly %}
-                <a href="/yearly" class="active">Yearly data</a>
+            <a href="/yearly" class="active">Yearly interpolation</a>
             {% else %}
-                <a href="/yearly">Yearly data</a>
+            <a href="/yearly">Yearly interpolation</a>
             {% endif %}
+        </li>
 
+        <li>    
             {% if active_monthly %}
-                <a href="/monthly" class="active">Monthly data</a>
+            <a href="/monthly" class="active">Monthly interpolation</a>
             {% else %}
-                <a href="/monthly">Monthly data</a>
+            <a href="/monthly">Monthly interpolation</a>
             {% endif %}
-
+        </li>
+                            
+        <li>    
             {% if active_daily %}
-                <a href="/daily" class="active">Daily data</a>
+            <a href="/daily" class="active">Daily interpolation</a>
             {% else %}
-                <a href="/daily">Daily data</a>
+            <a href="/daily">Daily interpolation</a>
             {% endif %}
+        </li>
+      </ul>
+        
+    </div>
+    
+    <div class="dropdown btn-group">
 
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Data downloads
+        <span class="caret"></span>
+      </button>
+
+    <ul class="dropdown-menu">
+        <h6 class="dropdown-header">Station data downloads</h6>
+
+        <li>
+            {% if active_data_prec_y %}
+            <a href="/dataviewsy" class="active">Yearly data</a>
+            {% else %}
+            <a href="/dataviewsy">Yearly data</a>
+            {% endif %}
+        </li>
+
+        <li>
+            {% if active_datam %}
+            <a href="/dataviewsm" class="active">Monthly data </a>
+            {% else %}
+            <a href="/dataviewsm">Monthly data </a>
+            {% endif %}
+        </li>
+
+        <li>
+            {% if active_datad %}
+            <a href="/dataviewsd" class="active">Daily data</a>
+            {% else %}
+            <a href="/dataviewsd">Daily data</a>
+            {% endif %}
+        </li>
+        
+        <h6 class="dropdown-header">Interpolate data downloads</h6>
+        <li>
+            {% if active_period_yearly %}
+            <a href="/yearly_period" class="active">Yearly periods</a>
+            {% else %}
+            <a href="/yearly_period">Yearly periods</a>
+            {% endif %}
+        </li>
+
+        <li>
+            {% if active_period_monthly %}
+            <a href="/monthly_period" class="active">Monthly periods</a>
+            {% else %}
+            <a href="/monthly_period">Monthly periods</a>
+            {% endif %}
+        </li>
+
+        <li>
+            {% if active_period_daily %}
+            <a href="/daily_period" class="active">Daily periods</a>
+            {% else %}
+            <a href="/daily_period">Daily periods</a>
+            {% endif %}
+        </li>
+
+    </ul>
+        
+    </div>
+    <div class="dropdown btn-group">
+
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Information
+        <span class="caret"></span>
+      </button>
+
+      <ul class="dropdown-menu">
+        <li>
             {% if active_cordinates %}
-                <a href="/cordinates" class="active">Points data</a>
-            {% else %}
-                <a href="/cordinates">Points data</a>
+            <a href="/cordinates" class="active">Points data</a>
+             {% else %}
+            <a href="/cordinates">Points data</a>
             {%endif%}
+        </li>
 
+        <li>
             {% if weather %}
-                <a href="/weather" class="active">Weather data</a>
+            <a href="/weather" class="active">Weather Forecast</a>
             {% else %}
-                <a href="/weather">Weather data</a>
+            <a href="/weather">Weather Forecast</a>
             {% endif %}
-        </div>
-
-        <div class="content container">
-            <div class="row">
-                <div class="col-md-8">
-                    {% block content %}
-                    {% endblock %}
-                </div>
+        </li>
+        </ul>
+    </div>
+</div>
+</div>
+</div>
+                        
+    <div class="content container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                {% block content %}
+                {% endblock %}
             </div>
         </div>
-    </body>
-</html>
+    </div>
+
+</body>
+</html>  

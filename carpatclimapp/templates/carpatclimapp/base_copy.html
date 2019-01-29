@@ -1,0 +1,125 @@
+{% load static %}
+
+<html>
+    <head>
+        <title>CarpatClim Online App</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{% static 'css/carpatclimapp.css' %}">
+        <link href="//fonts.googleapis.com/css?family=Ubuntu&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+        <link rel="shortcut icon" type="image/x-icon" href="{% static '/images/favicon.ico' %}"/>
+
+    </head>
+            
+            <body>
+                
+                <div class="page-header">
+
+                    <center><h1 color="#fafafa grey lighten-5"> CarpatClim Data </h1></center>
+
+                    <div class="dropdown">
+
+                         <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Data interpolate <span class="caret"></span></button>
+                        
+                        <ul class="dropdown-menu">
+
+                            <li>
+                                {% if active_yearly %}
+                                    <a href="/yearly" class="active">Yearly interpolation</a>
+                                {% else %}
+                                    <a href="/yearly">Yearly interpolation</a>
+                                {% endif %}
+                            </li>
+
+                            <li>    
+                                {% if active_monthly %}
+                                    <a href="/monthly" class="active">Monthly interpolation</a>
+                                {% else %}
+                                    <a href="/monthly">Monthly interpolation</a>
+                                {% endif %}
+                            </li>
+                            
+                            <li>    
+                                {% if active_daily %}
+                                    <a href="/daily" class="active">Daily interpolation</a>
+                                {% else %}
+                                    <a href="/daily">Daily interpolation</a>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                    
+
+                    <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Data downloads <span class="caret"></span></button>
+
+                            <ul class="dropdown-menu">
+
+                                <li>
+                                    {% if active_data_prec_y %}
+                                        <a href="/dataviewsy" class="active">Yearly data downloads</a>
+                                    {% else %}
+                                        <a href="/dataviewsy">Yearly data downloads</a>
+                                    {% endif %}
+                                </li>
+
+
+                                <li>
+                                     {% if active_datam %}
+                                        <a href="/dataviewsm" class="active">Monthly data downloads</a>
+                                    {% else %}
+                                        <a href="/dataviewsm">Monthly data downloads</a>
+                                    {% endif %}
+                                </li>
+
+                                <li>
+                                     {% if active_datad %}
+                                        <a href="/dataviewsd" class="active">Daily data downloads</a>
+                                    {% else %}
+                                        <a href="/dataviewsd">Daily data downloads</a>
+                                    {% endif %}
+                                </li>
+                            </ul>
+
+                    </div>
+
+                    <div class="dropdown">
+
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Information <span class="caret"></span></button>
+
+                        <ul class="dropdown-menu">
+                            <li>
+                                {% if active_cordinates %}
+                                    <a href="/cordinates" class="active">Points data</a>
+                                {% else %}
+                                    <a href="/cordinates">Points data</a>
+                                {%endif%}
+                            </li>
+
+                            <li>
+                                {% if weather %}
+                                    <a href="/weather" class="active">Weather Forecast</a>
+                                {% else %}
+                                    <a href="/weather">Weather Forecast</a>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+                          
+
+
+                <div class="content container-fluid">
+                    <div class="row">
+                        <div class="col-md-3">
+                            {% block content %}
+                            {% endblock %}
+                        </div>
+                    </div>
+                </div>
+           </body>
+</html>  
