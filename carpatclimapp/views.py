@@ -120,14 +120,24 @@ def yearly_period(request):
 			year1 = data.get('year1')
 			lon = data.get('lon')
 			lat = data.get('lat')
-			#inter = data.get('inter')
+			var = data.get('var')
+			inter = data.get('inter')
 			#date_path = '/%s/%s/%s' % (year,lon,lat)
+
 			year = int(year)
 			year1 = int(year1)
-			point = period_year_prec(year,year1,lon,lat)
-			
-			args = {'point':point}
-			return render (request, 'carpatclimapp/forloop.html', args)
+
+			if var == 'precipitation':
+
+				point = period_year_prec(year,year1,lon,lat,inter)
+				args = {'point':point}
+				return render (request, 'carpatclimapp/forloop.html', args)
+
+			else : 
+
+				point = period_year_temp(year,year1,lon,lat,inter)
+				args = {'point':point}
+				return render (request, 'carpatclimapp/forloop.html', args)
 
 				
 			#args = {'Year':year,'Lon':lon,'Lat':lat,'point.inter_point':point.inter_point}
@@ -155,6 +165,7 @@ def monthly_period(request):
 		form = PeriodMonthlyForm(request.POST)
 		if form.is_valid():
 			data = form.cleaned_data
+			var = data.get ('var')
 			year = data.get('year')
 			month = data.get('month')
 			year1 = data.get('year1')
@@ -163,13 +174,25 @@ def monthly_period(request):
 			lat = data.get ('lat')
 			inter = data.get('inter')
 
-			point = period_month_prec(year,month,year1,month1,lon,lat)
-			args = {'point':point}
-			response = HttpResponse(content_type='text/txt')
-			response['Content-Disposition'] = 'attachment; filename="precipitation.txt"'
-			writer = csv.writer(response)
-			writer.writerow([point])
-			return response
+			if var == 'precipitation':
+
+				point = period_month_prec(year,month,year1,month1,lon,lat,inter)
+				args = {'point':point}
+				response = HttpResponse(content_type='text/txt')
+				response['Content-Disposition'] = 'attachment; filename="precipitation.txt"'
+				writer = csv.writer(response)
+				writer.writerow([point])
+				return response
+
+			else:
+
+				point = period_month_temp(year,month,year1,month1,lon,lat,inter)
+				args = {'point':point}
+				response = HttpResponse(content_type='text/txt')
+				response['Content-Disposition'] = 'attachment; filename="precipitation.txt"'
+				writer = csv.writer(response)
+				writer.writerow([point])
+				return response
 			
 	else:
 
@@ -193,7 +216,7 @@ def daily_period(request):
 			inter = data.get('inter')
 
 			
-			cord = '/%s/%s'%(var,year)
+			#cord = '/%s/%s'%(var,year)
 	else:
 
 		form = PeriodDailyForm()

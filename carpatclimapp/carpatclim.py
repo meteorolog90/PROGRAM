@@ -703,7 +703,7 @@ def view_data_prec(year,month=None,day=None):
 	
 	return data_out,calc
 
-def period_year_prec(year,year1,lon,lat):
+def period_year_prec(year,year1,lon,lat,int):
 
 	cnx = sqlite3.connect(DB1)
 	cursor = cnx.cursor()
@@ -747,7 +747,7 @@ def period_year_prec(year,year1,lon,lat):
 				
 		return  (i,lon,lat,inter_point)
 
-def period_year_temp(year,year1,lon,lat):
+def period_year_temp(year,year1,lon,lat,inter):
 
 	cnx = sqlite3.connect(DB)
 	cursor = cnx.cursor()
@@ -784,19 +784,24 @@ def period_year_temp(year,year1,lon,lat):
 		xy = np.vstack([x_masked,y_masked]).T
 		xi = np.vstack([lon,lat]).T
 
-		
-		#inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
-		inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+		if inter == "linear":
+			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
+		elif inter == "cressman":
+			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
                           gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
                           rbf_smooth=0)
-			#writer.writerow({'Year':i,'Lon':inter_point_Lon,'Lat':inter_point_Lat,'Prec':inter_point})
-				
+		elif inter == "barnes":
+			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+                          rbf_smooth=0)
+
+
 		cursor.close()
 		cnx.close()
-				
+		#print (i,lon,lat,inter_point)		
 		return  (i,lon,lat,inter_point)
 
-def period_month_prec(year,month,year1,month1,lon,lat):
+def period_month_prec(year,month,year1,month1,lon,lat,inter):
 
 	cnx = sqlite3.connect(DB1)
 	cursor = cnx.cursor()
@@ -832,17 +837,23 @@ def period_month_prec(year,month,year1,month1,lon,lat):
 			xy = np.vstack([x_masked,y_masked]).T
 			xi = np.vstack([lon,lat]).T
 
-			
-			inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
-			
-				#writer.writerow({'Year':i,'Lon':inter_point_Lon,'Lat':inter_point_Lat,'Prec':inter_point})
-					
+			if inter == "linear":
+				inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
+			elif inter == "cressman":
+				inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+                          rbf_smooth=0)
+			elif inter == "barnes":
+				inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+                          rbf_smooth=0)
+
 			cursor.close()
 			cnx.close()
 
 			return (i,j,lon,lat,inter_point)
 
-def period_month_temp(year,month,year1,month1,lon,lat):
+def period_month_temp(year,month,year1,month1,lon,lat,inter):
 
 	cnx = sqlite3.connect(DB)
 	cursor = cnx.cursor()
@@ -880,9 +891,16 @@ def period_month_temp(year,month,year1,month1,lon,lat):
 			xi = np.vstack([lon,lat]).T
 
 			
-			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
-			
-				#writer.writerow({'Year':i,'Lon':inter_point_Lon,'Lat':inter_point_Lat,'Prec':inter_point})
+			if inter == "linear":
+				inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
+			elif inter == "cressman":
+				inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+                          rbf_smooth=0)
+			elif inter == "barnes":
+				inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+                          rbf_smooth=0)
 					
 			cursor.close()
 			cnx.close()
