@@ -755,6 +755,7 @@ def period_year_temp(year,year1,lon,lat):
 	table = 'yearly'
 	year = int(year)
 	year1 = int(year1)
+
 		
 	for i in range (year,year1+1,1):
 
@@ -777,13 +778,17 @@ def period_year_temp(year,year1,lon,lat):
 		temp =podaci_a['temp'].values
 				
 		x_masked, y_masked, temp_p = remove_nan_observations(lon_n, lat_n, temp)
-				
+		
+		lon = float(lon)
+		lat =float(lat)		
 		xy = np.vstack([x_masked,y_masked]).T
 		xi = np.vstack([lon,lat]).T
 
 		
-		inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
-		
+		#inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
+		inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+                          rbf_smooth=0)
 			#writer.writerow({'Year':i,'Lon':inter_point_Lon,'Lat':inter_point_Lat,'Prec':inter_point})
 				
 		cursor.close()
@@ -822,6 +827,8 @@ def period_month_prec(year,month,year1,month1,lon,lat):
 					
 			x_masked, y_masked, prec_p = remove_nan_observations(lon_n, lat_n, prec)
 					
+			lon = float(lon)
+			lat =float(lat)				
 			xy = np.vstack([x_masked,y_masked]).T
 			xi = np.vstack([lon,lat]).T
 
@@ -866,7 +873,9 @@ def period_month_temp(year,month,year1,month1,lon,lat):
 			temp =podaci_a['temp'].values
 					
 			x_masked, y_masked, temp_p = remove_nan_observations(lon_n, lat_n, temp)
-					
+			
+			lon = float(lon)
+			lat =float(lat)				
 			xy = np.vstack([x_masked,y_masked]).T
 			xi = np.vstack([lon,lat]).T
 
@@ -875,11 +884,11 @@ def period_month_temp(year,month,year1,month1,lon,lat):
 			
 				#writer.writerow({'Year':i,'Lon':inter_point_Lon,'Lat':inter_point_Lat,'Prec':inter_point})
 					
-			# cursor.close()
-			# cnx.close()
+			cursor.close()
+			cnx.close()
 
-			print (i,j,lon,lat,inter_point)
-			#return (i,j,lon,lat,inter_point)
+			#print (i,j,lon,lat,inter_point)
+			return (i,j,lon,lat,inter_point)
 
 
 def main():
