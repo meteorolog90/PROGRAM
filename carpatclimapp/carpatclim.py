@@ -735,7 +735,7 @@ def period_year_prec(year,year1,lon,lat):
 		x_masked, y_masked, prec_p = remove_nan_observations(lon_n, lat_n, prec)
 				
 		xy = np.vstack([x_masked,y_masked]).T
-		xi = ([lon,lat])
+		xi = np.vstack([lon,lat]).T
 
 		
 		inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
@@ -779,7 +779,7 @@ def period_year_temp(year,year1,lon,lat):
 		x_masked, y_masked, temp_p = remove_nan_observations(lon_n, lat_n, temp)
 				
 		xy = np.vstack([x_masked,y_masked]).T
-		xi = ([lon,lat])
+		xi = np.vstack([lon,lat]).T
 
 		
 		inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
@@ -823,7 +823,7 @@ def period_month_prec(year,month,year1,month1,lon,lat):
 			x_masked, y_masked, prec_p = remove_nan_observations(lon_n, lat_n, prec)
 					
 			xy = np.vstack([x_masked,y_masked]).T
-			xi =np.vstack([lon,lat]).T
+			xi = np.vstack([lon,lat]).T
 
 			
 			inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
@@ -868,7 +868,7 @@ def period_month_temp(year,month,year1,month1,lon,lat):
 			x_masked, y_masked, temp_p = remove_nan_observations(lon_n, lat_n, temp)
 					
 			xy = np.vstack([x_masked,y_masked]).T
-			xi = ([lon,lat])
+			xi = np.vstack([lon,lat]).T
 
 			
 			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
