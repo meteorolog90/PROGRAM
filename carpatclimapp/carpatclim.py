@@ -747,6 +747,50 @@ def period_year_prec(year,year1,lon,lat):
 				
 		return  (i,lon,lat,inter_point)
 
+def period_year_temp(year,year1,lon,lat):
+
+	cnx = sqlite3.connect(DB)
+	cursor = cnx.cursor()
+
+	table = 'yearly'
+	year = int(year)
+	year1 = int(year1)
+		
+	for i in range (year,year1+1,1):
+
+		query = '''
+	        SELECT  dates, cell, temp FROM %s WHERE dates = "%s" ;
+	        ''' % (table, i)
+				
+		df = pd.read_sql_query(query, cnx)
+				
+		tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid'
+		grid = pd.read_sql_query(tacka, cnx)
+
+		# cursor.close()
+		# cnx.close()
+				
+		podaci = pd.merge(df,grid,left_on='cell',right_on='id')
+		podaci_a = podaci.drop(['cell','id','country','altitude'],axis=1)
+		lon_n = podaci_a['lon'].values
+		lat_n = podaci_a['lat'].values
+		temp =podaci_a['temp'].values
+				
+		x_masked, y_masked, temp_p = remove_nan_observations(lon_n, lat_n, temp)
+				
+		xy = np.vstack([x_masked,y_masked]).T
+		xi = ([lon,lat])
+
+		
+		inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
+		
+			#writer.writerow({'Year':i,'Lon':inter_point_Lon,'Lat':inter_point_Lat,'Prec':inter_point})
+				
+		cursor.close()
+		cnx.close()
+				
+		return  (i,lon,lat,inter_point)
+
 def period_month_prec(year,month,year1,month1,lon,lat):
 
 	cnx = sqlite3.connect(DB1)
@@ -779,10 +823,55 @@ def period_month_prec(year,month,year1,month1,lon,lat):
 			x_masked, y_masked, prec_p = remove_nan_observations(lon_n, lat_n, prec)
 					
 			xy = np.vstack([x_masked,y_masked]).T
-			xi = ([lon,lat])
+			xi =np.vstack([lon,lat]).T
 
 			
 			inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
+			
+				#writer.writerow({'Year':i,'Lon':inter_point_Lon,'Lat':inter_point_Lat,'Prec':inter_point})
+					
+			cursor.close()
+			cnx.close()
+
+			return (i,j,lon,lat,inter_point)
+
+def period_month_temp(year,month,year1,month1,lon,lat):
+
+	cnx = sqlite3.connect(DB)
+	cursor = cnx.cursor()
+
+	table = 'monthly'
+	year = int(year)
+	year1 = int(year1)
+	month = int(month)
+	month1 = int(month1)
+
+	
+	for i in range (year,year1+1,1):
+		for j in range(month,month1+1,1):
+
+			query = '''
+		        SELECT  dates, cell, temp FROM %s WHERE dates = "%s-%s" ;
+		        ''' % (table,i,j)
+					
+			df = pd.read_sql_query(query, cnx)
+					
+			tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid'
+			grid = pd.read_sql_query(tacka, cnx)
+					
+			podaci = pd.merge(df,grid,left_on='cell',right_on='id')
+			podaci_a = podaci.drop(['cell','id','country','altitude'],axis=1)
+			lon_n = podaci_a['lon'].values
+			lat_n = podaci_a['lat'].values
+			temp =podaci_a['temp'].values
+					
+			x_masked, y_masked, temp_p = remove_nan_observations(lon_n, lat_n, temp)
+					
+			xy = np.vstack([x_masked,y_masked]).T
+			xi = ([lon,lat])
+
+			
+			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
 			
 				#writer.writerow({'Year':i,'Lon':inter_point_Lon,'Lat':inter_point_Lat,'Prec':inter_point})
 					
@@ -790,7 +879,7 @@ def period_month_prec(year,month,year1,month1,lon,lat):
 			# cnx.close()
 
 			print (i,j,lon,lat,inter_point)
-
+			#return (i,j,lon,lat,inter_point)
 
 
 def main():
