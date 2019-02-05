@@ -14,7 +14,10 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.colors import BoundaryNorm
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-
+from dateutil.rrule import rrule, MONTHLY
+from datetime import datetime
+from datetime import date
+from dateutil.rrule import rrule, DAILY
 
 
 from metpy.interpolate import interpolate_to_grid, remove_nan_observations,interpolate_to_points
@@ -74,6 +77,12 @@ def create_mapname_p(year, month=None, day=None):
 	result = '-'.join(list(map(str, prec_m)))
 	LOGGER.debug('Mapname is %s.', result)
 	return result
+
+def month_iter( start_year,start_month,end_year,end_month):
+    start = datetime(start_year, start_month, 1)
+    end = datetime(end_year, end_month, 1)
+
+    return (( d.year,d.month) for d in rrule(MONTHLY, dtstart=start, until=end))
 
 def save_map(fig, mapname):
 	"""
@@ -703,7 +712,7 @@ def view_data_prec(year,month=None,day=None):
 	
 	return data_out,calc
 
-def period_year_prec(year,year1,lon,lat,int):
+def period_year_prec(year,year1,lon,lat,inter):
 
 	cnx = sqlite3.connect(DB1)
 	cursor = cnx.cursor()
@@ -715,8 +724,8 @@ def period_year_prec(year,year1,lon,lat,int):
 	for i in range (year,year1+1,1):
 
 		query = '''
-	        SELECT  dates, cell, prec FROM %s WHERE dates = "%s" ;
-	        ''' % (table, i)
+			SELECT  dates, cell, prec FROM %s WHERE dates = "%s" ;
+			''' % (table, i)
 				
 		df = pd.read_sql_query(query, cnx)
 				
@@ -737,10 +746,17 @@ def period_year_prec(year,year1,lon,lat,int):
 		xy = np.vstack([x_masked,y_masked]).T
 		xi = np.vstack([lon,lat]).T
 
+		if inter == "linear":
+			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
+		elif inter == "cressman":
+			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
+		elif inter == "barnes":
+			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
 		
-		inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
-		
-			#writer.writerow({'Year':i,'Lon':inter_point_Lon,'Lat':inter_point_Lat,'Prec':inter_point})
 				
 		cursor.close()
 		cnx.close()
@@ -760,8 +776,8 @@ def period_year_temp(year,year1,lon,lat,inter):
 	for i in range (year,year1+1,1):
 
 		query = '''
-	        SELECT  dates, cell, temp FROM %s WHERE dates = "%s" ;
-	        ''' % (table, i)
+			SELECT  dates, cell, temp FROM %s WHERE dates = "%s" ;
+			''' % (table, i)
 				
 		df = pd.read_sql_query(query, cnx)
 				
@@ -788,12 +804,12 @@ def period_year_temp(year,year1,lon,lat,inter):
 			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
 		elif inter == "cressman":
 			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
-                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-                          rbf_smooth=0)
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
 		elif inter == "barnes":
 			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
-                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-                          rbf_smooth=0)
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
 
 
 		cursor.close()
@@ -812,46 +828,53 @@ def period_month_prec(year,month,year1,month1,lon,lat,inter):
 	month = int(month)
 	month1 = int(month1)
 
-	for i in range (year,year1+1,1):
-		for j in range(month,month1+1,1):
+	a=[]
 
-			query = '''
-		        SELECT  dates, cell, prec FROM %s WHERE dates = "%s-%s" ;
-		        ''' % (table,i,j)
-					
-			df = pd.read_sql_query(query, cnx)
-					
-			tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid1'
-			grid1 = pd.read_sql_query(tacka, cnx)
-					
-			podaci = pd.merge(df,grid1,left_on='cell',right_on='id')
-			podaci_a = podaci.drop(['cell','id','country','altitude'],axis=1)
-			lon_n = podaci_a['lon'].values
-			lat_n = podaci_a['lat'].values
-			prec =podaci_a['prec'].values
-					
-			x_masked, y_masked, prec_p = remove_nan_observations(lon_n, lat_n, prec)
-					
-			lon = float(lon)
-			lat =float(lat)				
-			xy = np.vstack([x_masked,y_masked]).T
-			xi = np.vstack([lon,lat]).T
+	for m in month_iter(year,month,year1,month1):
+		temp_m = list(filter(lambda x: x != None, m))
+		result = '-'.join(list(map(str, temp_m)))
+		a.append(result)
+	
+	for i in a:
 
-			if inter == "linear":
-				inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
-			elif inter == "cressman":
-				inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
-                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-                          rbf_smooth=0)
-			elif inter == "barnes":
-				inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
-                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-                          rbf_smooth=0)
+		query = '''
+				SELECT  dates, cell, prec FROM %s WHERE dates = "%s" ;
+				''' % (table,i)
+					
+		df = pd.read_sql_query(query, cnx)
+					
+		tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid1'
+		grid1 = pd.read_sql_query(tacka, cnx)
+						
+		lon_n = grid1['lon'].values
+		lat_n = grid1['lat'].values
+		prec = df['prec'].values
+					
+		x_masked, y_masked, prec_p = remove_nan_observations(lon_n, lat_n, prec)
+					
+		lon = float(lon)
+		lat =float(lat)				
+		xy = np.vstack([x_masked,y_masked]).T
+		xi = np.vstack([lon,lat]).T
 
-			cursor.close()
-			cnx.close()
+		if inter == "linear":
+			inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
+		elif inter == "cressman":
+			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
+		elif inter == "barnes":
+			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
 
-			return (i,j,lon,lat,inter_point)
+		#cursor.close()
+		#cnx.close()
+
+		#return (i,j,lon,lat,inter_point)
+		print (i,lon,lat,inter_point)
+
+
 
 def period_month_temp(year,month,year1,month1,lon,lat,inter):
 
@@ -864,50 +887,162 @@ def period_month_temp(year,month,year1,month1,lon,lat,inter):
 	month = int(month)
 	month1 = int(month1)
 
+	a=[]
+
+	for m in month_iter(year,month,year1,month1):
+		temp_m = list(filter(lambda x: x != None, m))
+		result = '-'.join(list(map(str, temp_m)))
+		a.append(result)
 	
-	for i in range (year,year1+1,1):
-		for j in range(month,month1+1,1):
+	for i in a:
 
-			query = '''
-		        SELECT  dates, cell, temp FROM %s WHERE dates = "%s-%s" ;
-		        ''' % (table,i,j)
+		query = '''
+		        SELECT  dates, cell, temp FROM %s WHERE dates = "%s" ;
+		        ''' % (table,i)
 					
-			df = pd.read_sql_query(query, cnx)
+		df = pd.read_sql_query(query, cnx)
 					
-			tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid'
-			grid = pd.read_sql_query(tacka, cnx)
+		tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid'
+		grid = pd.read_sql_query(tacka, cnx)
 					
-			podaci = pd.merge(df,grid,left_on='cell',right_on='id')
-			podaci_a = podaci.drop(['cell','id','country','altitude'],axis=1)
-			lon_n = podaci_a['lon'].values
-			lat_n = podaci_a['lat'].values
-			temp =podaci_a['temp'].values
-					
-			x_masked, y_masked, temp_p = remove_nan_observations(lon_n, lat_n, temp)
+		lon_n = grid['lon'].values
+		lat_n = grid['lat'].values
+		temp = df['temp'].values
 			
-			lon = float(lon)
-			lat =float(lat)				
-			xy = np.vstack([x_masked,y_masked]).T
-			xi = np.vstack([lon,lat]).T
+		x_masked, y_masked, temp_p = remove_nan_observations(lon_n, lat_n, temp)
+			
+		lon = float(lon)
+		lat =float(lat)				
+		xy = np.vstack([x_masked,y_masked]).T
+		xi = np.vstack([lon,lat]).T
 
 			
-			if inter == "linear":
-				inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
-			elif inter == "cressman":
-				inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+		if inter == "linear":
+			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
+		elif inter == "cressman":
+			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
                           gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
                           rbf_smooth=0)
-			elif inter == "barnes":
-				inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+		elif inter == "barnes":
+			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
                           gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
                           rbf_smooth=0)
 					
-			cursor.close()
-			cnx.close()
+		#cursor.close()
+		#cnx.close()
 
-			#print (i,j,lon,lat,inter_point)
-			return (i,j,lon,lat,inter_point)
+		print (i,lon,lat,inter_point)
+		# 	#return (i,j,lon,lat,inter_point)
 
+def period_daily_temp(year,month,day,year1,month1,day1,lon,lat,inter):
+
+	cnx = sqlite3.connect(DB)
+	cursor = cnx.cursor()
+
+	table = 'daily'
+	year = int(year)
+	year1 = int(year1)
+	month = int(month)
+	month1 = int(month1)
+	day = int (day)
+	day1 = int(day1)
+
+	a = date(year, month, day)
+	b = date(year1, month1, day1)
+	
+	for dt in rrule(DAILY, dtstart=a, until=b):
+		i= dt.strftime("%Y-%-m-%-d")
+		query = '''
+		        SELECT  dates, cell, temp FROM %s WHERE dates = "%s" ;
+		        ''' % (table,i)
+					
+		df = pd.read_sql_query(query, cnx)
+					
+		tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid'
+		grid = pd.read_sql_query(tacka, cnx)
+					
+		lon_n = grid['lon'].values
+		lat_n = grid['lat'].values
+		temp = df['temp'].values
+			
+		x_masked, y_masked, temp_p = remove_nan_observations(lon_n, lat_n, temp)
+			
+		lon = float(lon)
+		lat =float(lat)				
+		xy = np.vstack([x_masked,y_masked]).T
+		xi = np.vstack([lon,lat]).T
+
+			
+		if inter == "linear":
+			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
+		elif inter == "cressman":
+			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+                          rbf_smooth=0)
+		elif inter == "barnes":
+			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+                          rbf_smooth=0)
+					
+		#cursor.close()
+		#cnx.close()
+
+		print (i,lon,lat,inter_point)
+
+def period_daily_prec(year,month,day,year1,month1,day1,lon,lat,inter):
+
+	cnx = sqlite3.connect(DB1)
+	cursor = cnx.cursor()
+
+	table = 'daily'
+	year = int(year)
+	year1 = int(year1)
+	month = int(month)
+	month1 = int(month1)
+	day = int (day)
+	day1 = int(day1)
+
+	a = date(year, month, day)
+	b = date(year1, month1, day1)
+	
+	for dt in rrule(DAILY, dtstart=a, until=b):
+		i= dt.strftime("%Y-%-m-%-d")
+		query = '''
+		        SELECT  dates, cell, prec FROM %s WHERE dates = "%s" ;
+		        ''' % (table,i)
+					
+		df = pd.read_sql_query(query, cnx)
+					
+		tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid1'
+		grid1 = pd.read_sql_query(tacka, cnx)
+					
+		lon_n = grid1['lon'].values
+		lat_n = grid1['lat'].values
+		prec = df['prec'].values
+			
+		x_masked, y_masked, prec_p = remove_nan_observations(lon_n, lat_n, prec)
+			
+		lon = float(lon)
+		lat =float(lat)				
+		xy = np.vstack([x_masked,y_masked]).T
+		xi = np.vstack([lon,lat]).T
+
+			
+		if inter == "linear":
+			inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
+		elif inter == "cressman":
+			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
+                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+                          rbf_smooth=0)
+		elif inter == "barnes":
+			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
+                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+                          rbf_smooth=0)
+					
+		#cursor.close()
+		#cnx.close()
+
+		print (i,lon,lat,inter_point)
 
 def main():
 	"""Main function"""

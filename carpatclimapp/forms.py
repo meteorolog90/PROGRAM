@@ -135,6 +135,7 @@ class PeriodMonthlyForm(forms.Form):
 
 class PeriodDailyForm(forms.Form):
 
+	var = forms.ChoiceField(choices=MY_VARIABLE,label="Variable")
 	inter = forms.ChoiceField( choices = MY_CHOICES,label="Interpolation", initial='', widget=forms.Select(), required=True )
 	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961)
 	month = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1)
@@ -142,6 +143,6 @@ class PeriodDailyForm(forms.Form):
 	year1 = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961)
 	month1 = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1)
 	day1 = forms.ChoiceField(choices=[(x, x) for x in range(1, 32)], initial=1)
-	lat = forms.DecimalField(label="Lat", initial=44.0)
-	lon = forms.DecimalField(label="Lon",initial=19.0)
 	
+	lon = forms.DecimalField(label="Lon",initial=19.0)
+	lat = forms.DecimalField(label="Lat", initial=44.0)

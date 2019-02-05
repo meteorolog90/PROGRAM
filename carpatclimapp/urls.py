@@ -20,6 +20,7 @@ urlpatterns = [
 	path('<var>/<inter>/<int:year>/', views.carpatclim_y, name='carpatclim_y'),
 	path('<var>/<year>/<year1>/<lon>/<lat>/<inter>/', views.period_year_prec, name = 'period_year_prec'),
 	path('<var>/<year>/<month>/<year1>/<month1>/<lon>/<lat>/<inter>/', views.period_month_prec, name = 'period_month_prec'),
+	path('<var>/<year>/<month>/<day><year1>/<month1>/<day1><lon>/<lat>/<inter>/', views.period_daily_temp, name = 'period_daily_temp'),
 	path('dataviewsy/', views.dataviewsy, name='dataviewsy'),
 	path('dataviewsm/', views.dataviewsm, name='dataviewsm'),
 	path('dataviewsd/', views.dataviewsd, name='dataviewsd'),

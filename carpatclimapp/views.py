@@ -201,12 +201,14 @@ def monthly_period(request):
 
 	return render (request, 'carpatclimapp/home.html',{'form':form, 'active_period_monthly': active_period_monthly})
 
+
 def daily_period(request):
 
 	if request.method == "POST" :
 		form = PeriodDailyForm(request.POST)
 		if form.is_valid():
 			data = form.cleaned_data
+			var = data.get ('var')
 			year = data.get('year')
 			month = data.get('month')
 			day = data.get ('day')
@@ -214,7 +216,28 @@ def daily_period(request):
 			month1 = data.get('month1')
 			day1 = data.get ('day1')
 			inter = data.get('inter')
+			lon = data.get('lon')
+			lat = data.get('lat')
 
+			if var == 'precipitation':
+
+				point = period_daily_prec(year,month,day,year1,month1,day1,lon,lat,inter)
+				args = {'point':point}
+				response = HttpResponse(content_type='text/txt')
+				response['Content-Disposition'] = 'attachment; filename="precipitation.txt"'
+				writer = csv.writer(response)
+				writer.writerow([point])
+				return response
+
+			else:
+
+				point = period_daily_temp(year,month,day,year1,month1,day1,lon,lat,inter)
+				args = {'point':point}
+				response = HttpResponse(content_type='text/txt')
+				response['Content-Disposition'] = 'attachment; filename="precipitation.txt"'
+				writer = csv.writer(response)
+				writer.writerow([point])
+				return response
 			
 			#cord = '/%s/%s'%(var,year)
 	else:
