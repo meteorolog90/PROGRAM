@@ -231,7 +231,7 @@ def create_map_prec(year,inter,month=None,day=None):
 
 		LOGGER.debug('Interpolate to grid.')
 		precx, precy, prec = interpolate_to_grid(
-			x_masked, y_masked, precipi, interp_type='barnes', search_radius=80000, hres=5000)
+			x_masked, y_masked, precipi, interp_type='barnes', search_radius=80000, hres=10000)
 
 		LOGGER.debug('Interpolated to grid.')
 
@@ -303,7 +303,7 @@ def create_map_prec(year,inter,month=None,day=None):
 
 		LOGGER.debug('Interpolate to grid.')
 		precx, precy, prec = interpolate_to_grid(
-			x_masked, y_masked, precipi, interp_type='cressman', search_radius=80000, hres=5000)
+			x_masked, y_masked, precipi, interp_type='cressman', search_radius=80000, hres=10000)
 
 		LOGGER.debug('Interpolated to grid.')
 
@@ -508,7 +508,7 @@ def create_map(year,inter,month=None,day=None):
 
 
 		LOGGER.debug('Create map figure %s.', mapname)
-		levels = list(range(b, a))
+		levels = list(range(b, a,1))
 		# use viridis colormap
 		cmap = plt.get_cmap('viridis')
 
@@ -566,7 +566,7 @@ def create_map(year,inter,month=None,day=None):
 		LOGGER.debug('Create map figure %s.', mapname)
 		levels = list(range(b, a))
 		# use viridis colormap
-		cmap = plt.get_cmap('viridis')
+		cmap = plt.get_cmap('YlGnBu')
 
 
 
@@ -760,13 +760,15 @@ def period_year_prec(year,year1,lon,lat,inter):
 
 		for y in inter_point:
 			newlist.append(y)
+
+		
 		for z in xi:
 			newlist1.append(z)
-
+	xi= str(xi)
 	newlist_fix = [str(a) for a in newlist]
 	#sarr1 = [str(a) for a in newlist1]
-	#d = {'Year':newlist2,'Lon&Lat':sarr1[1], 'Rainfall':newlist}
-	d = {'Year':newlist2,'Rainfall':newlist_fix}
+	d = {'Year':newlist2,'Lon&Lat':newlist1, 'Rainfall':newlist}
+	#d = {'Year':newlist2,'Rainfall':newlist_fix}
 	df = pd.DataFrame(d)
 	
 
@@ -827,8 +829,9 @@ def period_year_temp(year,year1,lon,lat,inter):
 		for z in xi:
 			newlist1.append(z)
 
+	xi= str(xi)
 	newlist_fix = [str(a) for a in newlist]
-	d = {'Year':newlist2,'Temperature':newlist_fix}
+	d = {'Year':newlist2,'Lon&Lat':newlist1,'Temperature':newlist_fix}
 	df = pd.DataFrame(d)
 
 	return (df)
@@ -895,8 +898,9 @@ def period_month_prec(year,month,year1,month1,lon,lat,inter):
 		for z in xi:
 			newlist1.append(z)
 
+	xi =str(xi)
 	newlist_fix = [str(a) for a in newlist]
-	d = {'Year-Month-Day':newlist2,'Rainfall':newlist_fix}
+	d = {'Year-Month':newlist2,'Lon&Lat':newlist1, 'Rainfall':newlist}
 	df = pd.DataFrame(d)
 
 	return (df)
@@ -964,9 +968,9 @@ def period_month_temp(year,month,year1,month1,lon,lat,inter):
 			newlist.append(y)
 		for z in xi:
 			newlist1.append(z)
-
+	xi=str(xi)
 	newlist_fix = [str(a) for a in newlist]
-	d = {'Year-Month-Day':newlist2,'Temperature':newlist_fix}
+	d = {'Year-Month':newlist2,'Lon&Lat':newlist1,'Temperature':newlist_fix}
 	df = pd.DataFrame(d)
 
 	return (df)
@@ -1033,9 +1037,9 @@ def period_daily_temp(year,month,day,year1,month1,day1,lon,lat,inter):
 			newlist1.append(z)
 
 
-
+	xi =str(xi)
 	newlist_fix = [str(a) for a in newlist]
-	d = {'Year-Month':newlist2,'Temperature':newlist_fix}
+	d = {'Year-Month-Day':newlist2,'Lon&Lat':newlist1,'Temperature':newlist_fix}
 	df = pd.DataFrame(d)
 
 	return (df)
@@ -1102,8 +1106,9 @@ def period_daily_prec(year,month,day,year1,month1,day1,lon,lat,inter):
 		for z in xi:
 			newlist1.append(z)
 
+	xi =str(xi)
 	newlist_fix = [str(a) for a in newlist]
-	d = {'Year-Month':newlist2,'Rainfall':newlist_fix}
+	d = {'Year-Month-Day':newlist2,'Lon&Lat':newlist1, 'Rainfall':newlist}
 	df = pd.DataFrame(d)
 
 	return (df)
