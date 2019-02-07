@@ -131,26 +131,22 @@ def yearly_period(request):
 
 				point = period_year_prec(year,year1,lon,lat,inter)
 				args = {'point':point}
-				return render (request, 'carpatclimapp/forloop.html', args)
+				#return render (request, 'carpatclimapp/forloop.html', args)
+				response = HttpResponse(content_type='text/txt')
+				response['Content-Disposition'] = 'attachment; filename="precipitation.txt"'
+				writer = csv.writer(response)
+				writer.writerow([point])
+				return response
 
 			else : 
 
 				point = period_year_temp(year,year1,lon,lat,inter)
 				args = {'point':point}
-				return render (request, 'carpatclimapp/forloop.html', args)
-
-				
-			#args = {'Year':year,'Lon':lon,'Lat':lat,'point.inter_point':point.inter_point}
-			
-			
-			# response = HttpResponse(content_type='text/txt')
-			# response['Content-Disposition'] = 'attachment; filename="precipitation.txt"'
-			# writer = csv.writer(response)
-			# writer.writerow([point])
-			# return response
-
-			
-			#return render (request, 'carpatclimapp/forloop.html', args)
+				response = HttpResponse(content_type='text/txt')
+				response['Content-Disposition'] = 'attachment; filename="temp.txt"'
+				writer = csv.writer(response)
+				writer.writerow([point])
+				return response
 			
 	else:
 
@@ -189,7 +185,7 @@ def monthly_period(request):
 				point = period_month_temp(year,month,year1,month1,lon,lat,inter)
 				args = {'point':point}
 				response = HttpResponse(content_type='text/txt')
-				response['Content-Disposition'] = 'attachment; filename="precipitation.txt"'
+				response['Content-Disposition'] = 'attachment; filename="temperature.txt"'
 				writer = csv.writer(response)
 				writer.writerow([point])
 				return response
@@ -234,7 +230,7 @@ def daily_period(request):
 				point = period_daily_temp(year,month,day,year1,month1,day1,lon,lat,inter)
 				args = {'point':point}
 				response = HttpResponse(content_type='text/txt')
-				response['Content-Disposition'] = 'attachment; filename="precipitation.txt"'
+				response['Content-Disposition'] = 'attachment; filename="temperature.txt"'
 				writer = csv.writer(response)
 				writer.writerow([point])
 				return response

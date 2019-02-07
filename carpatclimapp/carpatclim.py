@@ -79,10 +79,10 @@ def create_mapname_p(year, month=None, day=None):
 	return result
 
 def month_iter( start_year,start_month,end_year,end_month):
-    start = datetime(start_year, start_month, 1)
-    end = datetime(end_year, end_month, 1)
+	start = datetime(start_year, start_month, 1)
+	end = datetime(end_year, end_month, 1)
 
-    return (( d.year,d.month) for d in rrule(MONTHLY, dtstart=start, until=end))
+	return (( d.year,d.month) for d in rrule(MONTHLY, dtstart=start, until=end))
 
 def save_map(fig, mapname):
 	"""
@@ -721,7 +721,12 @@ def period_year_prec(year,year1,lon,lat,inter):
 	year = int(year)
 	year1 = int(year1)
 		
+	newlist = []
+	newlist1 = []
+	newlist2 = []
+
 	for i in range (year,year1+1,1):
+		newlist2.append(i)
 
 		query = '''
 			SELECT  dates, cell, prec FROM %s WHERE dates = "%s" ;
@@ -732,14 +737,9 @@ def period_year_prec(year,year1,lon,lat,inter):
 		tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid1'
 		grid1 = pd.read_sql_query(tacka, cnx)
 
-		# cursor.close()
-		# cnx.close()
-				
-		podaci = pd.merge(df,grid1,left_on='cell',right_on='id')
-		podaci_a = podaci.drop(['cell','id','country','altitude'],axis=1)
-		lon_n = podaci_a['lon'].values
-		lat_n = podaci_a['lat'].values
-		prec =podaci_a['prec'].values
+		lon_n = grid1['lon'].values
+		lat_n = grid1['lat'].values
+		prec = df['prec'].values
 				
 		x_masked, y_masked, prec_p = remove_nan_observations(lon_n, lat_n, prec)
 				
@@ -747,21 +747,30 @@ def period_year_prec(year,year1,lon,lat,inter):
 		xi = np.vstack([lon,lat]).T
 
 		if inter == "linear":
-			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
+			inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
 		elif inter == "cressman":
-			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
 						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
 						  rbf_smooth=0)
 		elif inter == "barnes":
-			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
+			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
 						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
 						  rbf_smooth=0)
-		
-				
-		cursor.close()
-		cnx.close()
-				
-		return  (i,lon,lat,inter_point)
+	
+
+		for y in inter_point:
+			newlist.append(y)
+		for z in xi:
+			newlist1.append(z)
+
+	newlist_fix = [str(a) for a in newlist]
+	#sarr1 = [str(a) for a in newlist1]
+	#d = {'Year':newlist2,'Lon&Lat':sarr1[1], 'Rainfall':newlist}
+	d = {'Year':newlist2,'Rainfall':newlist_fix}
+	df = pd.DataFrame(d)
+	
+
+	return (df)
 
 def period_year_temp(year,year1,lon,lat,inter):
 
@@ -772,8 +781,13 @@ def period_year_temp(year,year1,lon,lat,inter):
 	year = int(year)
 	year1 = int(year1)
 
-		
+	newlist = []
+	newlist1 = []
+	newlist2 = []
+
 	for i in range (year,year1+1,1):
+
+		newlist2.append(i)
 
 		query = '''
 			SELECT  dates, cell, temp FROM %s WHERE dates = "%s" ;
@@ -783,9 +797,6 @@ def period_year_temp(year,year1,lon,lat,inter):
 				
 		tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid'
 		grid = pd.read_sql_query(tacka, cnx)
-
-		# cursor.close()
-		# cnx.close()
 				
 		podaci = pd.merge(df,grid,left_on='cell',right_on='id')
 		podaci_a = podaci.drop(['cell','id','country','altitude'],axis=1)
@@ -811,11 +822,16 @@ def period_year_temp(year,year1,lon,lat,inter):
 						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
 						  rbf_smooth=0)
 
+		for y in inter_point:
+			newlist.append(y)
+		for z in xi:
+			newlist1.append(z)
 
-		cursor.close()
-		cnx.close()
-		#print (i,lon,lat,inter_point)		
-		return  (i,lon,lat,inter_point)
+	newlist_fix = [str(a) for a in newlist]
+	d = {'Year':newlist2,'Temperature':newlist_fix}
+	df = pd.DataFrame(d)
+
+	return (df)
 
 def period_month_prec(year,month,year1,month1,lon,lat,inter):
 
@@ -834,8 +850,14 @@ def period_month_prec(year,month,year1,month1,lon,lat,inter):
 		temp_m = list(filter(lambda x: x != None, m))
 		result = '-'.join(list(map(str, temp_m)))
 		a.append(result)
-	
+
+	newlist = []
+	newlist1 = []
+	newlist2 = []
+
 	for i in a:
+
+		newlist2.append(i)
 
 		query = '''
 				SELECT  dates, cell, prec FROM %s WHERE dates = "%s" ;
@@ -867,14 +889,17 @@ def period_month_prec(year,month,year1,month1,lon,lat,inter):
 			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
 						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
 						  rbf_smooth=0)
+		
+		for y in inter_point:
+			newlist.append(y)
+		for z in xi:
+			newlist1.append(z)
 
-		#cursor.close()
-		#cnx.close()
+	newlist_fix = [str(a) for a in newlist]
+	d = {'Year-Month-Day':newlist2,'Rainfall':newlist_fix}
+	df = pd.DataFrame(d)
 
-		#return (i,j,lon,lat,inter_point)
-		print (i,lon,lat,inter_point)
-
-
+	return (df)
 
 def period_month_temp(year,month,year1,month1,lon,lat,inter):
 
@@ -893,12 +918,19 @@ def period_month_temp(year,month,year1,month1,lon,lat,inter):
 		temp_m = list(filter(lambda x: x != None, m))
 		result = '-'.join(list(map(str, temp_m)))
 		a.append(result)
+
+	newlist = []
+	newlist1 = []
+	newlist2 = []
+
 	
 	for i in a:
 
+		newlist2.append(i)
+
 		query = '''
-		        SELECT  dates, cell, temp FROM %s WHERE dates = "%s" ;
-		        ''' % (table,i)
+				SELECT  dates, cell, temp FROM %s WHERE dates = "%s" ;
+				''' % (table,i)
 					
 		df = pd.read_sql_query(query, cnx)
 					
@@ -921,18 +953,23 @@ def period_month_temp(year,month,year1,month1,lon,lat,inter):
 			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
 		elif inter == "cressman":
 			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
-                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-                          rbf_smooth=0)
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
 		elif inter == "barnes":
 			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
-                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-                          rbf_smooth=0)
-					
-		#cursor.close()
-		#cnx.close()
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
 
-		print (i,lon,lat,inter_point)
-		# 	#return (i,j,lon,lat,inter_point)
+		for y in inter_point:
+			newlist.append(y)
+		for z in xi:
+			newlist1.append(z)
+
+	newlist_fix = [str(a) for a in newlist]
+	d = {'Year-Month-Day':newlist2,'Temperature':newlist_fix}
+	df = pd.DataFrame(d)
+
+	return (df)
 
 def period_daily_temp(year,month,day,year1,month1,day1,lon,lat,inter):
 
@@ -949,12 +986,18 @@ def period_daily_temp(year,month,day,year1,month1,day1,lon,lat,inter):
 
 	a = date(year, month, day)
 	b = date(year1, month1, day1)
+
+	newlist = []
+	newlist1 = []
+	newlist2 = []
 	
 	for dt in rrule(DAILY, dtstart=a, until=b):
 		i= dt.strftime("%Y-%-m-%-d")
+		newlist2.append(i)
+
 		query = '''
-		        SELECT  dates, cell, temp FROM %s WHERE dates = "%s" ;
-		        ''' % (table,i)
+				SELECT  dates, cell, temp FROM %s WHERE dates = "%s" ;
+				''' % (table,i)
 					
 		df = pd.read_sql_query(query, cnx)
 					
@@ -977,18 +1020,27 @@ def period_daily_temp(year,month,day,year1,month1,day1,lon,lat,inter):
 			inter_point = interpolate_to_points(xy,temp_p,xi, interp_type='linear')
 		elif inter == "cressman":
 			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
-                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-                          rbf_smooth=0)
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
 		elif inter == "barnes":
 			inter_point =interpolate_to_points(xy,temp_p,xi, interp_type='cressman', minimum_neighbors=3,
-                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-                          rbf_smooth=0)
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
+
+		for y in inter_point:
+			newlist.append(y)
+		for z in xi:
+			newlist1.append(z)
+
+
+
+	newlist_fix = [str(a) for a in newlist]
+	d = {'Year-Month':newlist2,'Temperature':newlist_fix}
+	df = pd.DataFrame(d)
+
+	return (df)
 					
-		#cursor.close()
-		#cnx.close()
-
-		print (i,lon,lat,inter_point)
-
+		
 def period_daily_prec(year,month,day,year1,month1,day1,lon,lat,inter):
 
 	cnx = sqlite3.connect(DB1)
@@ -1004,12 +1056,18 @@ def period_daily_prec(year,month,day,year1,month1,day1,lon,lat,inter):
 
 	a = date(year, month, day)
 	b = date(year1, month1, day1)
+
+	newlist = []
+	newlist1 = []
+	newlist2 = []
 	
 	for dt in rrule(DAILY, dtstart=a, until=b):
 		i= dt.strftime("%Y-%-m-%-d")
+		newlist2.append(i)
+
 		query = '''
-		        SELECT  dates, cell, prec FROM %s WHERE dates = "%s" ;
-		        ''' % (table,i)
+				SELECT  dates, cell, prec FROM %s WHERE dates = "%s" ;
+				''' % (table,i)
 					
 		df = pd.read_sql_query(query, cnx)
 					
@@ -1032,17 +1090,23 @@ def period_daily_prec(year,month,day,year1,month1,day1,lon,lat,inter):
 			inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
 		elif inter == "cressman":
 			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
-                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-                          rbf_smooth=0)
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
 		elif inter == "barnes":
 			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
-                          gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-                          rbf_smooth=0)
-					
-		#cursor.close()
-		#cnx.close()
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
 
-		print (i,lon,lat,inter_point)
+		for y in inter_point:
+			newlist.append(y)
+		for z in xi:
+			newlist1.append(z)
+
+	newlist_fix = [str(a) for a in newlist]
+	d = {'Year-Month':newlist2,'Rainfall':newlist_fix}
+	df = pd.DataFrame(d)
+
+	return (df)
 
 def main():
 	"""Main function"""

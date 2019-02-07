@@ -112,9 +112,9 @@ class PeriodYearlyForm(forms.Form):
 
 	inter = forms.ChoiceField( choices = MY_CHOICES,label="Interpolation", initial='', widget=forms.Select(), required=True )
 	var = forms.ChoiceField(choices=MY_VARIABLE,label="Variable")
-	#year=forms.DateField(widget=forms.SelectDateWidget(years=YEARS,months=None))
-	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961)
-	year1 = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961)
+	
+	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961,label="Start Year")
+	year1 = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961,label="End Year")
 	lon = forms.DecimalField(label="Lon",initial=19.0)
 	lat = forms.DecimalField(label="Lat", initial=44.0)
 	
@@ -125,10 +125,10 @@ class PeriodMonthlyForm(forms.Form):
 	#field1 = forms.DateField(widget=SelectDateWidget(empty_label="Nothing"))
 	inter = forms.ChoiceField( choices = MY_CHOICES,label="Interpolation", initial='', widget=forms.Select(), required=True )
 	var = forms.ChoiceField(choices=MY_VARIABLE,label="Variable")
-	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961)
-	month = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1)
-	year1 = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961)
-	month1 = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1)
+	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961,label="Start Year")
+	month = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1,label="Start Month")
+	year1 = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961,label="End Year")
+	month1 = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1,label="End Month")
 	lon = forms.DecimalField(label="Lon",initial=19.0)
 	lat = forms.DecimalField(label="Lat", initial=44.0)
 	
@@ -137,12 +137,12 @@ class PeriodDailyForm(forms.Form):
 
 	var = forms.ChoiceField(choices=MY_VARIABLE,label="Variable")
 	inter = forms.ChoiceField( choices = MY_CHOICES,label="Interpolation", initial='', widget=forms.Select(), required=True )
-	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961)
-	month = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1)
-	day = forms.ChoiceField(choices=[(x, x) for x in range(1, 32)], initial=1)
-	year1 = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961)
-	month1 = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1)
-	day1 = forms.ChoiceField(choices=[(x, x) for x in range(1, 32)], initial=1)
+	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961,label="Start Year")
+	month = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1,label="Start Month")
+	day = forms.ChoiceField(choices=[(x, x) for x in range(1, 32)], initial=1,label="Start Day")
+	year1 = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961,label="End Year")
+	month1 = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1,label="End Month")
+	day1 = forms.ChoiceField(choices=[(x, x) for x in range(1, 32)], initial=1,label="End Day")
 	
 	lon = forms.DecimalField(label="Lon",initial=19.0)
 	lat = forms.DecimalField(label="Lat", initial=44.0)
