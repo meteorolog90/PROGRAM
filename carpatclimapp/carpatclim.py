@@ -566,7 +566,7 @@ def create_map(year,inter,month=None,day=None):
 		LOGGER.debug('Create map figure %s.', mapname)
 		levels = list(range(b, a))
 		# use viridis colormap
-		cmap = plt.get_cmap('YlGnBu')
+		cmap = plt.get_cmap('viridis')
 
 
 
