@@ -159,7 +159,7 @@ def create_map_prec(year,inter,month=None,day=None):
 
 		LOGGER.debug('Interpolate to grid.')
 		precx, precy, prec = interpolate_to_grid(
-			x_masked, y_masked, precipi, interp_type='linear', search_radius=80000, hres=10000)
+			x_masked, y_masked, precipi, interp_type='linear', search_radius=80000, hres=5000)
 
 		LOGGER.debug('Interpolated to grid.')
 
@@ -167,23 +167,27 @@ def create_map_prec(year,inter,month=None,day=None):
 		prec = np.ma.masked_where(np.isnan(prec),prec)
 		LOGGER.debug('Mask applied.')
 
-		a = int(result_df.values.max())
-		b = int(result_df.values.min())
+		#a = int(result_df.values.max())
+		#b = int(result_df.values.min())
 	   
+		a = int(prec.max())
+		b = int(prec.min())
+
+		clevs = list(range(b,a))
 		
-		LOGGER.debug('Crea)te map figure %s.', mapname)
-		if table == 'monthly':
-			clevs = list(range(b,a))
-		elif table == 'yearly':
-			clevs = list(range(b,a,200))
-		elif table == 'daily':
-			if a <2:
-				clevs = (b,0.1,0.2,0.3,0.4,0.5,0.6,a)
+		# LOGGER.debug('Crea)te map figure %s.', mapname)
+		# if table == 'monthly':
+		# 	clevs = list(range(b,a))
+		# elif table == 'yearly':
+		# 	clevs = list(range(b,a,200))
+		# elif table == 'daily':
+		# 	if a <2:
+		# 		clevs = (b,0.1,0.2,0.3,0.4,0.5,0.6,a)
 			
-			elif a > 20:
-				clevs = (b,2,4,6,8,10,12,14,16,a)
-			else:
-				clevs = (b,1,1.5,2.5,3,3.5,a)
+		# 	elif a > 20:
+		# 		clevs = (b,2,4,6,8,10,12,14,16,a)
+		# 	else:
+		# 		clevs = (b,1,1.5,2.5,3,3.5,a)
 
 		# use viridis colormap
 		
@@ -231,7 +235,7 @@ def create_map_prec(year,inter,month=None,day=None):
 
 		LOGGER.debug('Interpolate to grid.')
 		precx, precy, prec = interpolate_to_grid(
-			x_masked, y_masked, precipi, interp_type='barnes', search_radius=80000, hres=10000)
+			x_masked, y_masked, precipi, interp_type='barnes', search_radius=80000, hres=5000)
 
 		LOGGER.debug('Interpolated to grid.')
 
@@ -239,23 +243,26 @@ def create_map_prec(year,inter,month=None,day=None):
 		prec = np.ma.masked_where(np.isnan(prec),prec)
 		LOGGER.debug('Mask applied.')
 
-		a = int(result_df.values.max())
-		b = int(result_df.values.min())
+		#a = int(result_df.values.max())
+		#b = int(result_df.values.min())
 		
+		a = int(prec.max())
+		b = int(prec.min())
 		
 		LOGGER.debug('Create map figure %s.', mapname)
-		if table == 'monthly':
-			clevs = list(range(b,a))
-		elif table == 'yearly':
-			clevs = list(range(b,a,200))
-		elif table == 'daily':
-			if a <2:
-				clevs = (b,0.1,0.2,0.3,0.4,0.5,0.6,a)
+		clevs = list(range(b,a))
+		# if table == 'monthly':
+		# 	clevs = list(range(b,a))
+		# elif table == 'yearly':
+		# 	clevs = list(range(b,a,200))
+		# elif table == 'daily':
+		# 	if a <2:
+		# 		clevs = (b,0.1,0.2,0.3,0.4,0.5,0.6,a)
 			
-			elif a > 20:
-				clevs = (b,2,4,6,8,10,12,14,16,a)
-			else:
-				clevs = (b,1,1.5,2.5,3,3.5,a)
+		# 	elif a > 20:
+		# 		clevs = (b,2,4,6,8,10,12,14,16,a)
+		# 	else:
+		# 		clevs = (b,1,1.5,2.5,3,3.5,a)
 		
 		# use viridis colormap
 		
@@ -311,22 +318,25 @@ def create_map_prec(year,inter,month=None,day=None):
 		prec = np.ma.masked_where(np.isnan(prec),prec)
 		LOGGER.debug('Mask applied.')
 
-		a = int(result_df.values.max())
-		b = int(result_df.values.min())
-		
+		#a = int(result_df.values.max())
+		#b = int(result_df.values.min())
+
+		a = int(prec.max())
+		b = int(prec.min())
 		LOGGER.debug('Create map figure %s.', mapname)
-		if table == 'monthly':
-			clevs = list(range(b,a,20))
-		elif table == 'yearly':
-			clevs = list(range(b,a,200))
-		elif table == 'daily':
-			if a <2:
-				clevs = (b,0.1,0.2,0.3,0.4,0.5,0.6,a)
+		clevs = list (range (b,a))
+		# if table == 'monthly':
+		# 	clevs = list(range(b,a,20))
+		# elif table == 'yearly':
+		# 	clevs = list(range(b,a,200))
+		# elif table == 'daily':
+		# 	if a <2:
+		# 		clevs = (b,0.1,0.2,0.3,0.4,0.5,0.6,a)
 			
-			elif a > 20:
-				clevs = (b,2,4,6,8,10,12,14,16,a)
-			else:
-				clevs = (b,1,1.5,2.5,3,3.5,a)
+		# 	elif a > 20:
+		# 		clevs = (b,2,4,6,8,10,12,14,16,a)
+		# 	else:
+		# 		clevs = (b,1,1.5,2.5,3,3.5,a)
 			
 			
 		# use viridis colormap
@@ -364,7 +374,7 @@ def create_map_prec(year,inter,month=None,day=None):
 
 		# TODO: decrease borders, check does it works??
 		# fig.tight_bbox()
-		fig.savefig(mapname + '.png', bbox_inches='tight')
+		fig.savefig(mapname + inter + '.png', bbox_inches='tight')
 		LOGGER.info('Map figure %s created.', (mapname))
 
 		plt.close('all')
@@ -444,8 +454,11 @@ def create_map(year,inter,month=None,day=None):
 		LOGGER.debug('Mask applied.')
 
 
-		a = int(result_df.values.max())
-		b = int(result_df.values.min())
+		#a = int(result_df.values.max())
+		#b = int(result_df.values.min())
+
+		a = int(temp.max())
+		b = int(temp.min())
 
 		LOGGER.debug('Create map figure %s.', mapname)
 		levels = list(range(b, a))
@@ -456,7 +469,7 @@ def create_map(year,inter,month=None,day=None):
 
 		norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 		# TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
-		fig = plt.figure(figsize=(10, 8))
+		fig = plt.figure(figsize=(10, 10))
 
 		LOGGER.debug('Add projection to figure.')
 		view = fig.add_subplot(1, 1, 1, projection=to_proj)
@@ -473,7 +486,7 @@ def create_map(year,inter,month=None,day=None):
 
 		# make colorbar legend for figure
 		mmb = view.pcolormesh(tempx, tempy, temp, cmap=cmap, norm=norm)
-		fig.colorbar(mmb,shrink=.8, pad=0.06, boundaries=levels)
+		fig.colorbar(mmb,shrink=.65, pad=0.06, boundaries=levels)
 		#view.set_title('Srednja temperatura')
 
 		# TODO: decrease borders, check does it works??
@@ -491,7 +504,7 @@ def create_map(year,inter,month=None,day=None):
 
 		LOGGER.debug('Interpolate to grid.')
 		tempx, tempy, temp = interpolate_to_grid(
-			x_masked, y_masked, temps, interp_type='barnes', search_radius=100000, hres=10000)
+			x_masked, y_masked, temps, interp_type='barnes', search_radius=80000, hres=2000)
 
 		LOGGER.debug('Interpolated to grid.')
 
@@ -499,8 +512,8 @@ def create_map(year,inter,month=None,day=None):
 		temp = np.ma.masked_where(np.isnan(temp), temp)
 		LOGGER.debug('Mask applied.')
 
-		# a = int(result_df.values.max())
-		# b = int(result_df.values.min())
+		#a = int(result_df.values.max())
+		#b = int(result_df.values.min())
 
 		a = int(temp.max())
 		b = int(temp.min())
@@ -516,7 +529,7 @@ def create_map(year,inter,month=None,day=None):
 
 		norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 		# TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
-		fig = plt.figure(figsize=(10, 8))
+		fig = plt.figure(figsize=(10, 10))
 
 		LOGGER.debug('Add projection to figure.')
 		view = fig.add_subplot(1, 1, 1, projection=to_proj)
@@ -533,7 +546,7 @@ def create_map(year,inter,month=None,day=None):
 
 		# make colorbar legend for figure
 		mmb = view.pcolormesh(tempx, tempy, temp, cmap=cmap, norm=norm)
-		fig.colorbar(mmb, shrink=.8, pad=0.06, boundaries=levels)
+		fig.colorbar(mmb, shrink=.65, pad=0.06, boundaries=levels)
 		#view.set_title('Srednja temperatura')
 
 		# TODO: decrease borders, check does it works??
@@ -552,7 +565,7 @@ def create_map(year,inter,month=None,day=None):
 		LOGGER.debug('Interpolate to grid.')
 		tempx, tempy, temp = interpolate_to_grid(
 			x_masked, y_masked, temps, interp_type='cressman',
-			minimum_neighbors=3, search_radius=80000, hres=10000)
+			minimum_neighbors=6, search_radius=80000, hres=2000)
 
 		LOGGER.debug('Interpolated to grid.')
 
@@ -560,11 +573,13 @@ def create_map(year,inter,month=None,day=None):
 		temp = np.ma.masked_where(np.isnan(temp), temp)
 		LOGGER.debug('Mask applied.')
 
-		a = int(result_df.values.max())
-		b = int(result_df.values.min())
+		#a = int(result_df.values.max())
+		#b = int(result_df.values.min())
+		a = int(temp.max())
+		b = int(temp.min())
 
 		LOGGER.debug('Create map figure %s.', mapname)
-		levels = list(range(b, a))
+		levels = list(range(b, a,1))
 		# use viridis colormap
 		cmap = plt.get_cmap('viridis')
 
@@ -572,7 +587,7 @@ def create_map(year,inter,month=None,day=None):
 
 		norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 		# TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
-		fig = plt.figure(figsize=(10, 8))
+		fig = plt.figure(figsize=(10, 10))
 
 		LOGGER.debug('Add projection to figure.')
 		view = fig.add_subplot(1, 1, 1, projection=to_proj)
@@ -589,7 +604,7 @@ def create_map(year,inter,month=None,day=None):
 
 		# make colorbar legend for figure
 		mmb = view.pcolormesh(tempx, tempy, temp, cmap=cmap, norm=norm)
-		fig.colorbar(mmb, shrink=.8, pad=0.06, boundaries=levels)
+		fig.colorbar(mmb, shrink=.65, pad=0.06, boundaries=levels)
 		#view.set_title('Srednja temperatura')
 
 		# TODO: decrease borders, check does it works??

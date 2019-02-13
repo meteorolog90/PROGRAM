@@ -133,7 +133,8 @@ def yearly_period(request):
 				args = {'point':point}
 				#return render (request, 'carpatclimapp/forloop.html', args)
 				response = HttpResponse(content_type='text/txt')
-				response['Content-Disposition'] = 'attachment; filename="precipitation.txt"'
+				date_path = '/%s/%s/%s' % (year,lon,lat)
+				response['Content-Disposition'] = 'attachment; filename=rainfall.txt'
 				writer = csv.writer(response)
 				writer.writerow([point])
 				return response
