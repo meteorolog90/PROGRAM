@@ -43,6 +43,9 @@ DB = os.path.join(DATA_DIR, DB_FILE)
 DB_FILE1 = 'carpatclimPREC.sqlite3'
 DB1 = os.path.join(DATA_DIR, DB_FILE1)
 
+DB_FILE2= 'carpatclimRH.sqlite3'
+DB2= os.path.join(DATA_DIR, DB_FILE2)
+
 
 def file_exists(filename):
 	""" Check if file exists and return path or False"""
@@ -100,6 +103,288 @@ def save_map(fig, mapname):
 	fig.savefig(file_path, bbox_inches='tight')
 	LOGGER.info('Map figure %s saved.', filename)
 	return file_path
+
+def create_map_RH(year,inter,month,day=None):
+
+	LOGGER.info('Create map.')
+
+	LOGGER.debug('Connect to DB2%s.', DB_FILE2)
+	conn = sqlite3.connect(DB2)
+	LOGGER.debug('Get a cursor object.')
+	cursor = conn.cursor()
+
+	mapname = create_mapname_p(year, month, day)
+	LOGGER.debug('Map name is %s.', mapname)
+
+	if day:
+		table ='daily'
+	elif month:
+		table = 'monthly'
+	
+
+	query = '''
+		SELECT dates, cell, RH FROM %s WHERE dates = "%s";
+		''' % (table, mapname)
+
+	LOGGER.debug('SQL query: %s.', query)
+	result_df = pd.read_sql_query(query, conn, index_col='dates')
+	result_df = result_df['RH']
+
+	LOGGER.debug('Prepare grid cooardinates.')
+	LOGGER.debug('Apply Albers Equal Area projection.')
+	to_proj = ccrs.Mercator()
+	LOGGER.debug('Albers Equal Area projection applied.')
+
+	query = '''SELECT id, lon, lat FROM %s;''' % 'grid'
+	LOGGER.debug('SQL query: %s', query)
+	grid = pd.read_sql_query(query, conn, index_col='id')
+
+	cursor.close()
+	conn.close()
+
+	lon = grid['lon'].values
+	lat = grid['lat'].values
+
+	LOGGER.debug('Begin transformation to Geodetic coordinate system.')
+	xp_, yp_, _ = to_proj.transform_points(ccrs.Geodetic(), lon, lat).T
+	LOGGER.debug('Transform to Geodetic coordinate system completed.')
+
+
+	LOGGER.debug('Remove NaNs.')
+	x_masked, y_masked, RHi = remove_nan_observations(
+		xp_, yp_, result_df.values)
+	LOGGER.debug('NaNs removed.')
+
+	
+
+	if inter == "linear":
+
+		LOGGER.debug('Interpolate to grid.')
+		RHx, RHy, RH = interpolate_to_grid(
+			x_masked, y_masked, RHi, interp_type='linear', search_radius=80000, hres=5000)
+
+		LOGGER.debug('Interpolated to grid.')
+
+		LOGGER.debug('Apply mask for NaNs.')
+		RH = np.ma.masked_where(np.isnan(RH),RH)
+		LOGGER.debug('Mask applied.')
+
+		#a = int(result_df.values.max())
+		#b = int(result_df.values.min())
+	   
+		a = int(RH.max())
+		b = int(RH.min())
+
+		clevs = list(range(b,a))
+		
+		# LOGGER.debug('Crea)te map figure %s.', mapname)
+		# if table == 'monthly':
+		# 	clevs = list(range(b,a+10,10))
+		# elif table == 'yearly':
+		# 	clevs = list(range(b,a+100,100))
+		# elif table == 'daily':
+		# 	if a <2:
+		# 		clevs = list(range(b,a+0.1,0.1))
+			
+		# 	elif a > 20:
+		# 		clevs = list(range(b,a+2,2))
+		# 	else:
+		# 		clevs = list(range(b,a+2))
+
+		# use viridis colormap
+		
+		cmap = plt.get_cmap('Blues')
+		#cmap = mcolors.ListedColormap(cmap_data, 'precipitation')
+		norm = mcolors.BoundaryNorm(clevs, cmap.N)
+
+		#cmap = plt.get_cmap('viridis')
+		#norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+		# TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
+		fig = plt.figure(figsize=(10,10))
+
+		LOGGER.debug('Add projection to figure.')
+		view = fig.add_subplot(1, 1, 1, projection=to_proj)
+		LOGGER.debug('Projection added.')
+
+		LOGGER.debug('Add map features to figure.')
+		view.set_extent([27.0, 17.1, 50, 44.5])
+		#view.set_extent([22.7, 18.5, 46.6, 44.1])
+		view.add_feature(cfeature.BORDERS, linestyle=':')
+		LOGGER.debug('Map features added.')
+		
+		# make colorbar legend for figure
+		#mmb = view.pcolormesh(precx, precy, prec, cmap=cmap, norm=norm)
+		#mmb = view.pcolormesh(precx, precy, prec, cmap=cmap, norm=norm)
+		cs = view.contourf(RHx, RHy, RH,clevs, cmap=cmap, norm=norm)
+		#fig.colorbar(mmb,shrink=.4, pad=0.02, boundaries=levels)
+		fig.colorbar(cs,shrink=.65, pad=0.06)
+		#view.set_title('Srednje padavine')
+		gl = view.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+				  linewidth=1, color='gray', alpha=0.5, linestyle='--')
+		gl.xformatter = LONGITUDE_FORMATTER
+		gl.yformatter = LATITUDE_FORMATTER
+
+		# TODO: decrease borders, check does it works??
+		# fig.tight_bbox()
+		#fig.savefig(mapname + '.png', bbox_inches='tight')
+		LOGGER.info('Map figure %s created.', (mapname))
+
+		plt.close('all')
+
+		return fig
+
+	if inter == "barnes" :
+
+		LOGGER.debug('Interpolate to grid.')
+		RHx, RHy, RH = interpolate_to_grid(
+			x_masked, y_masked, RHi, interp_type='barnes', search_radius=80000, hres=5000)
+
+		LOGGER.debug('Interpolated to grid.')
+
+		LOGGER.debug('Apply mask for NaNs.')
+		RH = np.ma.masked_where(np.isnan(RH),RH)
+		LOGGER.debug('Mask applied.')
+
+		#a = int(result_df.values.max())
+		#b = int(result_df.values.min())
+		
+		a = int(RH.max())
+		b = int(RH.min())
+		
+		LOGGER.debug('Create map figure %s.', mapname)
+		clevs = list(range(b,a))
+		# if table == 'monthly':
+		# 	clevs = list(range(b,a+10,10))
+		# elif table == 'yearly':
+		# 	clevs = list(range(b,a+100,100))
+		# elif table == 'daily':
+		# 	if a <2:
+		# 		clevs = list(range(b,a+0.1,0.1))
+			
+		# 	elif a > 20:
+		# 		clevs = list(range(b,a+2,2))
+		# 	else:
+		# 		clevs = list(range(b,a+2))
+		
+		# use viridis colormap
+		
+		cmap = plt.get_cmap('Blues')
+		#cmap = mcolors.ListedColormap(cmap_data, 'precipitation')
+		norm = mcolors.BoundaryNorm(clevs, cmap.N)
+
+		#cmap = plt.get_cmap('viridis')
+		#norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+		# TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
+		fig = plt.figure(figsize=(10,10))
+
+		LOGGER.debug('Add projection to figure.')
+		view = fig.add_subplot(1, 1, 1, projection=to_proj)
+		LOGGER.debug('Projection added.')
+
+		LOGGER.debug('Add map features to figure.')
+		view.set_extent([27.0, 17.1, 50, 44.5])
+		#view.set_extent([22.7, 18.5, 46.6, 44.1])
+		view.add_feature(cfeature.BORDERS, linestyle=':')
+		LOGGER.debug('Map features added.')
+		
+		# make colorbar legend for figure
+		#mmb = view.pcolormesh(precx, precy, prec, cmap=cmap, norm=norm)
+		#mmb = view.pcolormesh(precx, precy, prec, cmap=cmap, norm=norm)
+		cs = view.contourf(RHx, RHy, RH,clevs, cmap=cmap, norm=norm)
+		#fig.colorbar(mmb,shrink=.4, pad=0.02, boundaries=levels)
+		fig.colorbar(cs,shrink=.65, pad=0.06)
+		#view.set_title('Srednje padavine')
+		gl = view.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+				  linewidth=1, color='gray', alpha=0.5, linestyle='--')
+		gl.xformatter = LONGITUDE_FORMATTER
+		gl.yformatter = LATITUDE_FORMATTER
+
+		# TODO: decrease borders, check does it works??
+		# fig.tight_bbox()
+		#fig.savefig(mapname + '.png', bbox_inches='tight')
+		LOGGER.info('Map figure %s created.', (mapname))
+
+		plt.close('all')
+
+		return fig
+
+	if inter == "cressman" :
+
+		LOGGER.debug('Interpolate to grid.')
+		RHx, RHy, RH = interpolate_to_grid(
+			x_masked, y_masked, RHi, interp_type='cressman', search_radius=80000, hres=5000)
+
+		LOGGER.debug('Interpolated to grid.')
+
+		LOGGER.debug('Apply mask for NaNs.')
+		RH = np.ma.masked_where(np.isnan(RH),RH)
+		LOGGER.debug('Mask applied.')
+
+		#a = int(result_df.values.max())
+		#b = int(result_df.values.min())
+
+		a = int(RH.max())
+		b = int(RH.min())
+
+		LOGGER.debug('Create map figure %s.', mapname)
+		clevs = list (range (b,a))
+
+		# if table == 'monthly':
+		# 	clevs = list(range(b,a+10,10))
+		# elif table == 'yearly':
+		# 	clevs = list(range(b,a+100,100))
+		# elif table == 'daily':
+		# 	if a <2:
+		# 		clevs = list(range(b,a+0.1,0.1))
+			
+		# 	elif a > 20:
+		# 		clevs = list(range(b,a+2,2))
+		# 	else:
+		# 		clevs = list(range(b,a+2))
+			
+			
+		# use viridis colormap
+		
+		cmap = plt.get_cmap('Blues')
+		#cmap = mcolors.ListedColormap(cmap_data, 'precipitation')
+		norm = mcolors.BoundaryNorm(clevs, cmap.N)
+
+		#cmap = plt.get_cmap('viridis')
+		#norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+		# TODO plt.figure(figsize=(20, 10)) decrese to 13, 10
+		fig = plt.figure(figsize=(10,10))
+
+		LOGGER.debug('Add projection to figure.')
+		view = fig.add_subplot(1, 1, 1, projection=to_proj)
+		LOGGER.debug('Projection added.')
+
+		LOGGER.debug('Add map features to figure.')
+		view.set_extent([27.0, 17.1, 50, 44.5])
+		#view.set_extent([22.7, 18.5, 46.6, 44.1])
+		view.add_feature(cfeature.BORDERS, linestyle=':')
+		LOGGER.debug('Map features added.')
+		gl = view.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+				  linewidth=1, color='gray', alpha=0.5, linestyle='--')
+		gl.xformatter = LONGITUDE_FORMATTER
+		gl.yformatter = LATITUDE_FORMATTER
+		
+		# make colorbar legend for figure
+		#mmb = view.pcolormesh(precx, precy, prec, cmap=cmap, norm=norm)
+		#mmb = view.pcolormesh(precx, precy, prec, cmap=cmap, norm=norm)
+		cs = view.contourf(RHx, RHy, RH,clevs, cmap=cmap, norm=norm)
+		#fig.colorbar(mmb,shrink=.4, pad=0.02, boundaries=levels)
+		fig.colorbar(cs,shrink=.65, pad=0.06)
+		#view.set_title('Srednje padavine')
+
+		# TODO: decrease borders, check does it works??
+		# fig.tight_bbox()
+		#fig.savefig(mapname + inter + '.png', bbox_inches='tight')
+		LOGGER.info('Map figure %s created.', (mapname))
+
+		plt.close('all')
+
+		return fig
+
 
 def create_map_prec(year,inter,month=None,day=None):
 
@@ -173,21 +458,21 @@ def create_map_prec(year,inter,month=None,day=None):
 		a = int(prec.max())
 		b = int(prec.min())
 
-		clevs = list(range(b,a))
+		#clevs = list(range(b,a))
 		
 		# LOGGER.debug('Crea)te map figure %s.', mapname)
-		# if table == 'monthly':
-		# 	clevs = list(range(b,a))
-		# elif table == 'yearly':
-		# 	clevs = list(range(b,a,200))
-		# elif table == 'daily':
-		# 	if a <2:
-		# 		clevs = (b,0.1,0.2,0.3,0.4,0.5,0.6,a)
+		if table == 'monthly':
+			clevs = list(range(b,a+10,10))
+		elif table == 'yearly':
+			clevs = list(range(b,a+100,100))
+		elif table == 'daily':
+			if a <2:
+				clevs = list(range(b,a+0.1,0.1))
 			
-		# 	elif a > 20:
-		# 		clevs = (b,2,4,6,8,10,12,14,16,a)
-		# 	else:
-		# 		clevs = (b,1,1.5,2.5,3,3.5,a)
+			elif a > 20:
+				clevs = list(range(b,a+2,2))
+			else:
+				clevs = list(range(b,a+2))
 
 		# use viridis colormap
 		
@@ -224,7 +509,7 @@ def create_map_prec(year,inter,month=None,day=None):
 
 		# TODO: decrease borders, check does it works??
 		# fig.tight_bbox()
-		fig.savefig(mapname + '.png', bbox_inches='tight')
+		#fig.savefig(mapname + '.png', bbox_inches='tight')
 		LOGGER.info('Map figure %s created.', (mapname))
 
 		plt.close('all')
@@ -250,19 +535,19 @@ def create_map_prec(year,inter,month=None,day=None):
 		b = int(prec.min())
 		
 		LOGGER.debug('Create map figure %s.', mapname)
-		clevs = list(range(b,a))
-		# if table == 'monthly':
-		# 	clevs = list(range(b,a))
-		# elif table == 'yearly':
-		# 	clevs = list(range(b,a,200))
-		# elif table == 'daily':
-		# 	if a <2:
-		# 		clevs = (b,0.1,0.2,0.3,0.4,0.5,0.6,a)
+		#clevs = list(range(b,a))
+		if table == 'monthly':
+			clevs = list(range(b,a+10,10))
+		elif table == 'yearly':
+			clevs = list(range(b,a+100,100))
+		elif table == 'daily':
+			if a <2:
+				clevs = list(range(b,a+0.1,0.1))
 			
-		# 	elif a > 20:
-		# 		clevs = (b,2,4,6,8,10,12,14,16,a)
-		# 	else:
-		# 		clevs = (b,1,1.5,2.5,3,3.5,a)
+			elif a > 20:
+				clevs = list(range(b,a+2,2))
+			else:
+				clevs = list(range(b,a+2))
 		
 		# use viridis colormap
 		
@@ -299,7 +584,7 @@ def create_map_prec(year,inter,month=None,day=None):
 
 		# TODO: decrease borders, check does it works??
 		# fig.tight_bbox()
-		fig.savefig(mapname + '.png', bbox_inches='tight')
+		#fig.savefig(mapname + '.png', bbox_inches='tight')
 		LOGGER.info('Map figure %s created.', (mapname))
 
 		plt.close('all')
@@ -310,7 +595,7 @@ def create_map_prec(year,inter,month=None,day=None):
 
 		LOGGER.debug('Interpolate to grid.')
 		precx, precy, prec = interpolate_to_grid(
-			x_masked, y_masked, precipi, interp_type='cressman', search_radius=80000, hres=10000)
+			x_masked, y_masked, precipi, interp_type='cressman', search_radius=80000, hres=5000)
 
 		LOGGER.debug('Interpolated to grid.')
 
@@ -323,20 +608,22 @@ def create_map_prec(year,inter,month=None,day=None):
 
 		a = int(prec.max())
 		b = int(prec.min())
+
 		LOGGER.debug('Create map figure %s.', mapname)
-		clevs = list (range (b,a))
-		# if table == 'monthly':
-		# 	clevs = list(range(b,a,20))
-		# elif table == 'yearly':
-		# 	clevs = list(range(b,a,200))
-		# elif table == 'daily':
-		# 	if a <2:
-		# 		clevs = (b,0.1,0.2,0.3,0.4,0.5,0.6,a)
+		#clevs = list (range (b,a))
+
+		if table == 'monthly':
+			clevs = list(range(b,a+10,10))
+		elif table == 'yearly':
+			clevs = list(range(b,a+100,100))
+		elif table == 'daily':
+			if a <2:
+				clevs = list(range(b,a+0.1,0.1))
 			
-		# 	elif a > 20:
-		# 		clevs = (b,2,4,6,8,10,12,14,16,a)
-		# 	else:
-		# 		clevs = (b,1,1.5,2.5,3,3.5,a)
+			elif a > 20:
+				clevs = list(range(b,a+2,2))
+			else:
+				clevs = list(range(b,a+2))
 			
 			
 		# use viridis colormap
@@ -374,7 +661,7 @@ def create_map_prec(year,inter,month=None,day=None):
 
 		# TODO: decrease borders, check does it works??
 		# fig.tight_bbox()
-		fig.savefig(mapname + inter + '.png', bbox_inches='tight')
+		#fig.savefig(mapname + inter + '.png', bbox_inches='tight')
 		LOGGER.info('Map figure %s created.', (mapname))
 
 		plt.close('all')
@@ -461,7 +748,7 @@ def create_map(year,inter,month=None,day=None):
 		b = int(temp.min())
 
 		LOGGER.debug('Create map figure %s.', mapname)
-		levels = list(range(b, a))
+		levels = list(range(b, a+1))
 		# use viridis colormap
 		cmap = plt.get_cmap('viridis')
 
@@ -504,7 +791,7 @@ def create_map(year,inter,month=None,day=None):
 
 		LOGGER.debug('Interpolate to grid.')
 		tempx, tempy, temp = interpolate_to_grid(
-			x_masked, y_masked, temps, interp_type='barnes', search_radius=80000, hres=2000)
+			x_masked, y_masked, temps, interp_type='barnes', search_radius=80000, hres=5000)
 
 		LOGGER.debug('Interpolated to grid.')
 
@@ -521,7 +808,7 @@ def create_map(year,inter,month=None,day=None):
 
 
 		LOGGER.debug('Create map figure %s.', mapname)
-		levels = list(range(b, a,1))
+		levels = list(range(b, a+1))
 		# use viridis colormap
 		cmap = plt.get_cmap('viridis')
 
@@ -565,7 +852,7 @@ def create_map(year,inter,month=None,day=None):
 		LOGGER.debug('Interpolate to grid.')
 		tempx, tempy, temp = interpolate_to_grid(
 			x_masked, y_masked, temps, interp_type='cressman',
-			minimum_neighbors=6, search_radius=80000, hres=2000)
+			minimum_neighbors=3, search_radius=80000, hres=5000)
 
 		LOGGER.debug('Interpolated to grid.')
 
@@ -579,7 +866,7 @@ def create_map(year,inter,month=None,day=None):
 		b = int(temp.min())
 
 		LOGGER.debug('Create map figure %s.', mapname)
-		levels = list(range(b, a,1))
+		levels = list(range(b, a+1))
 		# use viridis colormap
 		cmap = plt.get_cmap('viridis')
 
@@ -757,28 +1044,33 @@ def period_year_prec(year,year1,lon,lat,inter):
 		prec = df['prec'].values
 				
 		x_masked, y_masked, prec_p = remove_nan_observations(lon_n, lat_n, prec)
+
+		lon = float(lon)
+		lat = float(lat)
 				
 		xy = np.vstack([x_masked,y_masked]).T
 		xi = np.vstack([lon,lat]).T
 
 		if inter == "linear":
 			inter_point = interpolate_to_points(xy,prec_p,xi, interp_type='linear')
+			
 		elif inter == "cressman":
 			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
 						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-						  rbf_smooth=0)
+						  )
+
 		elif inter == "barnes":
 			inter_point =interpolate_to_points(xy,prec_p,xi, interp_type='cressman', minimum_neighbors=3,
 						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
-						  rbf_smooth=0)
+						  )
 	
 
 		for y in inter_point:
 			newlist.append(y)
 
-		
 		for z in xi:
 			newlist1.append(z)
+
 	xi= str(xi)
 	newlist_fix = [str(a) for a in newlist]
 	#sarr1 = [str(a) for a in newlist1]

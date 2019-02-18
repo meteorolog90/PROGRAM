@@ -18,12 +18,12 @@ DATA_DIR = os.path.join(APP_DIR, 'data')
 if not os.path.exists(DATA_DIR):
     os.mkdir(DATA_DIR)
 
-YEARLY = os.path.join(DATA_DIR, 'CARPATGRID_TA_Y.ser')
-MONTHLY = os.path.join(DATA_DIR, 'CARPATGRID_TA_M.ser')
-DAILY = os.path.join(DATA_DIR, 'CARPATGRID_TA_D.ser')
-GRID = os.path.join(DATA_DIR, 'PredtandfilaGrid1.dat')
+#YEARLY = os.path.join(DATA_DIR, 'CARPATGRID_PREC_D.ser')
+MONTHLY = os.path.join(DATA_DIR, 'CARPATGRID_RH_M.ser')
+DAILY = os.path.join(DATA_DIR, 'CARPATGRID_RH_D.ser')
+GRID = os.path.join(DATA_DIR, 'PredtandfilaGrid.dat')
 
-DB_FILE = 'carpatclim.sqlite3'
+DB_FILE = 'carpatclimRH.sqlite3'
 DB = os.path.join(DATA_DIR, DB_FILE)
 
 
@@ -66,7 +66,7 @@ def db_create_tables():
     LOGGER.debug('Get a cursor object.')
     cursor = conn.cursor()
     tables = [
-        'yearly',
+        
         'monthly',
         'daily',
     ]
@@ -81,7 +81,7 @@ def db_create_tables():
                 CREATE TABLE %s (
                     dates DATE,
                     cell INTEGER NOT NULL,
-                    temp REAL,
+                    RH REAL,
                     PRIMARY KEY (dates, cell));
             ''' % table)
 
@@ -135,43 +135,42 @@ def db_write_grid(df_):
     LOGGER.debug('DB connection %s closed.', DB_FILE)
 
 
-def db_write_y(filename):
+#def db_write_y(filename):
     """Write yearly data to sqlite database"""
 
-    table = 'yearly'
-    rows = 0
-    chunksize = 150
-    chunk_num = 0
-    LOGGER.info('Connect to DB %s - table: %s.', DB_FILE, table)
-    conn = sqlite3.connect(DB)
-    LOGGER.debug('Get a cursor object.')
-    cursor = conn.cursor()
+#    table = 'yearly'
+#    rows = 0
+#    chunksize = 150
+#    chunk_num = 0
+#    LOGGER.info('Connect to DB %s - table: %s.', DB_FILE, table)
+#    conn = sqlite3.connect(DB)
+#    LOGGER.debug('Get a cursor object.')
+ #   cursor = conn.cursor()
 
-    for df_ in pd.read_csv(filename, sep=r'\s+', chunksize=chunksize):
+  #  for df_ in pd.read_csv(filename, sep=r'\s+', chunksize=chunksize):
         # LOGGER.debug('%s columns will be imported to DB.',
                     # len(df_.index)*len(df_.columns))
-        chunk_num += 1
+   #     chunk_num += 1
         # df_.to_sql(name=table, conn, if_exists='append')
-        with conn:
-            for year in df_.index:
-                columns_to_insert = []
-                date = '-'.join([str(year)])
-                for temp, cell in zip(df_.loc[year], df_.columns):
-                    columns_to_insert.append([date, cell, temp])
-                    rows += 1
-                    LOGGER.debug('Columns prepared for DB insert: %s.',
-                                 len(columns_to_insert))
+    #    with conn:
+     #       for year in df_.index:
+      #          columns_to_insert = []
+       #         date = '-'.join([str(year)])
+        #        for prec, cell in zip(df_.loc[year], df_.columns):
+         #           columns_to_insert.append([date, cell, prec])
+          #          rows += 1
+           #         LOGGER.debug('Columns prepared for DB insert: %s.',
+            #                     len(columns_to_insert))
 
-                cursor.executemany('''INSERT INTO %s(dates, cell, temp)
-                                  VALUES(?,?,?)''' % table, columns_to_insert)
+             #   cursor.executemany('''INSERT INTO %s(dates, cell, prec)
+                                  #VALUES(?,?,?)''' % table, columns_to_insert)
 
 
-
-    LOGGER.info('Written to table %s: %s row(s).', table, rows)
-    LOGGER.info('Written to table %s: %s chunks(s).', table, chunk_num)
-    LOGGER.debug('Closing DB connection %s.', DB_FILE)
-    conn.close()
-    LOGGER.info('DB %s closed.', DB_FILE)
+    #LOGGER.info('Written to table %s: %s row(s).', table, rows)
+    #LOGGER.info('Written to table %s: %s chunks(s).', table, chunk_num)
+    #LOGGER.debug('Closing DB connection %s.', DB_FILE)
+    #conn.close()
+    #LOGGER.info('DB %s closed.', DB_FILE)
 
 
 def db_write_m(filename):
@@ -195,13 +194,13 @@ def db_write_m(filename):
             for year, month in df_.index:
                 columns_to_insert = []
                 date = '-'.join([str(year), str(month)])
-                for temp, cell in zip(df_.loc[year, month], df_.columns):
-                    columns_to_insert.append([date, cell, temp])
+                for RH, cell in zip(df_.loc[year, month], df_.columns):
+                    columns_to_insert.append([date, cell, RH])
                     rows += 1
                     LOGGER.debug('Columns prepared for DB insert: %s.',
                                  len(columns_to_insert))
 
-                cursor.executemany('''INSERT INTO %s(dates, cell, temp)
+                cursor.executemany('''INSERT INTO %s(dates, cell, RH)
                                   VALUES(?,?,?)''' % table, columns_to_insert)
 
 
@@ -238,13 +237,13 @@ def db_write_d(filename):
             for year, month, day in df_.index:
                 columns_to_insert = []
                 date = '-'.join([str(year), str(month), str(day)])
-                for temp, cell in zip(df_.loc[year, month, day], df_.columns):
-                    columns_to_insert.append([date, cell, temp])
+                for RH, cell in zip(df_.loc[year, month, day], df_.columns):
+                    columns_to_insert.append([date, cell, RH])
                     rows += 1
                     LOGGER.debug('Columns prepared for DB insert: %s.',
                                  len(columns_to_insert))
 
-                cursor.executemany('''INSERT INTO %s(dates, cell, temp)
+                cursor.executemany('''INSERT INTO %s(dates, cell, RH)
                                   VALUES(?,?,?)''' % table, columns_to_insert)
 
 
@@ -267,7 +266,7 @@ def main(args):
         df_grid = load_grid(GRID)
         db_write_grid(df_grid)
 
-        db_write_y(YEARLY)
+        #db_write_y(YEARLY)
         db_write_m(MONTHLY)
         db_write_d(DAILY)
     else:

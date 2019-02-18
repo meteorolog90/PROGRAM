@@ -7,6 +7,15 @@ MY_VARIABLE = (
 		("precipitation", "precipitation"),    
 	)
 
+
+MY_VARIABLE1 = (
+		
+		("temperature", "temperature"),
+		("precipitation", "precipitation"),
+		("relative humidity", "relative humidity"),    
+	)
+
+
 MY_CHOICES = (
 		
 		("linear", "linear"),
@@ -68,7 +77,7 @@ class CronFormMonthly(forms.Form):
 	
 	https://stackoverflow.com/questions/8859504/django-form-dropdown-list-of-numbers
 	"""
-	var = forms.ChoiceField(choices=MY_VARIABLE,label="Variable")	
+	var = forms.ChoiceField(choices=MY_VARIABLE1,label="Variable")	
 	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961)
 	month = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1)
 	inter = forms.ChoiceField( choices = MY_CHOICES,label="Interpolation", initial='', widget=forms.Select(), required=True )
@@ -88,7 +97,7 @@ class CronFormDaily(forms.Form):
 	https://stackoverflow.com/questions/8859504/django-form-dropdown-list-of-numbers
 	"""
 
-	var = forms.ChoiceField(choices=MY_VARIABLE,label="Variable")
+	var = forms.ChoiceField(choices=MY_VARIABLE1,label="Variable")
 	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961)
 	month = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1)
 	# TODO: add check for number of days in specific month

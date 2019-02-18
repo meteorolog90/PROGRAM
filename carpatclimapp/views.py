@@ -407,15 +407,27 @@ def carpatclim_m_figure(request,var,inter,year, month):
 		return response
 
 	if var == 'precipitation': 
-		map1 = create_map_prec(year,inter, month, day=None)
+		map = create_map_prec(year,inter, month, day=None)
 		buffer = BytesIO()
-		canvas = FigureCanvas(map1)
+		canvas = FigureCanvas(map)
 		canvas.print_png(buffer)
 		
 
 		response = HttpResponse(buffer.getvalue(), content_type='image/png')
 		response['Content-Length'] = str(len(response.content))
 		return response
+
+	if var == 'relative humidity': 
+		map = create_map_RH(year,inter, month, day=None)
+		buffer = BytesIO()
+		canvas = FigureCanvas(map)
+		canvas.print_png(buffer)
+		
+
+		response = HttpResponse(buffer.getvalue(), content_type='image/png')
+		response['Content-Length'] = str(len(response.content))
+		return response
+
 
 
 
@@ -434,9 +446,21 @@ def carpatclim_d_figure(request,var,inter,year, month, day):
 		return response
 
 	if var == 'precipitation':
-		map1 = create_map_prec(year, inter,month, day)
+		map = create_map_prec(year, inter,month, day)
 		buffer = BytesIO()
-		canvas = FigureCanvas(map1)
+		canvas = FigureCanvas(map)
+		canvas.print_png(buffer)
+
+		response = HttpResponse(buffer.getvalue(), content_type='image/png')
+		# I recommend to add Content-Length for Django
+		response['Content-Length'] = str(len(response.content))
+
+		return response
+
+	if var == 'relative humidity':
+		map = create_map_RH(year, inter,month, day)
+		buffer = BytesIO()
+		canvas = FigureCanvas(map)
 		canvas.print_png(buffer)
 
 		response = HttpResponse(buffer.getvalue(), content_type='image/png')
