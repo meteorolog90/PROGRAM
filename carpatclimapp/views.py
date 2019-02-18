@@ -181,12 +181,22 @@ def monthly_period(request):
 				writer.writerow([point])
 				return response
 
-			else:
+			if var == 'temperature':
 
 				point = period_month_temp(year,month,year1,month1,lon,lat,inter)
 				args = {'point':point}
 				response = HttpResponse(content_type='text/txt')
 				response['Content-Disposition'] = 'attachment; filename="temperature.txt"'
+				writer = csv.writer(response)
+				writer.writerow([point])
+				return response
+
+			if var == 'relative humidity':
+
+				point = period_month_RH(year,month,year1,month1,lon,lat,inter)
+				args = {'point':point}
+				response = HttpResponse(content_type='text/txt')
+				response['Content-Disposition'] = 'attachment; filename="relative humidity.txt"'
 				writer = csv.writer(response)
 				writer.writerow([point])
 				return response
@@ -226,12 +236,22 @@ def daily_period(request):
 				writer.writerow([point])
 				return response
 
-			else:
+			if var == 'temperature':
 
 				point = period_daily_temp(year,month,day,year1,month1,day1,lon,lat,inter)
 				args = {'point':point}
 				response = HttpResponse(content_type='text/txt')
 				response['Content-Disposition'] = 'attachment; filename="temperature.txt"'
+				writer = csv.writer(response)
+				writer.writerow([point])
+				return response
+
+			if var == 'relative humidity':
+
+				point = period_daily_RH(year,month,day,year1,month1,day1,lon,lat,inter)
+				args = {'point':point}
+				response = HttpResponse(content_type='text/txt')
+				response['Content-Disposition'] = 'attachment; filename="relative humidity.txt"'
 				writer = csv.writer(response)
 				writer.writerow([point])
 				return response

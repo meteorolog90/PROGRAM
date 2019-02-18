@@ -1143,6 +1143,75 @@ def period_year_temp(year,year1,lon,lat,inter):
 
 	return (df)
 
+def period_month_RH(year,month,year1,month1,lon,lat,inter):
+
+	cnx = sqlite3.connect(DB2)
+	cursor = cnx.cursor()
+
+	table = 'monthly'
+	year = int(year)
+	year1 = int(year1)
+	month = int(month)
+	month1 = int(month1)
+
+	a=[]
+
+	for m in month_iter(year,month,year1,month1):
+		temp_m = list(filter(lambda x: x != None, m))
+		result = '-'.join(list(map(str, temp_m)))
+		a.append(result)
+
+	newlist = []
+	newlist1 = []
+	newlist2 = []
+
+	for i in a:
+
+		newlist2.append(i)
+
+		query = '''
+				SELECT  dates, cell, RH FROM %s WHERE dates = "%s" ;
+				''' % (table,i)
+					
+		df = pd.read_sql_query(query, cnx)
+					
+		tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid'
+		grid = pd.read_sql_query(tacka, cnx)
+						
+		lon_n = grid['lon'].values
+		lat_n = grid['lat'].values
+		RH = df['RH'].values
+					
+		x_masked, y_masked, RH_p = remove_nan_observations(lon_n, lat_n, RH)
+					
+		lon = float(lon)
+		lat =float(lat)				
+		xy = np.vstack([x_masked,y_masked]).T
+		xi = np.vstack([lon,lat]).T
+
+		if inter == "linear":
+			inter_point = interpolate_to_points(xy,RH_p,xi, interp_type='linear')
+		elif inter == "cressman":
+			inter_point =interpolate_to_points(xy,RH_p,xi, interp_type='cressman', minimum_neighbors=3,
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
+		elif inter == "barnes":
+			inter_point =interpolate_to_points(xy,RH_p,xi, interp_type='cressman', minimum_neighbors=3,
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
+		
+		for y in inter_point:
+			newlist.append(y)
+		for z in xi:
+			newlist1.append(z)
+
+	xi =str(xi)
+	newlist_fix = [str(a) for a in newlist]
+	d = {'Year-Month':newlist2,'Lon&Lat':newlist1, 'Relative humidity':newlist}
+	df = pd.DataFrame(d)
+
+	return (df)
+
 def period_month_prec(year,month,year1,month1,lon,lat,inter):
 
 	cnx = sqlite3.connect(DB1)
@@ -1278,6 +1347,75 @@ def period_month_temp(year,month,year1,month1,lon,lat,inter):
 	xi=str(xi)
 	newlist_fix = [str(a) for a in newlist]
 	d = {'Year-Month':newlist2,'Lon&Lat':newlist1,'Temperature':newlist_fix}
+	df = pd.DataFrame(d)
+
+	return (df)
+
+def period_daily_RH(year,month,day,year1,month1,day1,lon,lat,inter):
+
+	cnx = sqlite3.connect(DB2)
+	cursor = cnx.cursor()
+
+	table = 'daily'
+	year = int(year)
+	year1 = int(year1)
+	month = int(month)
+	month1 = int(month1)
+	day = int (day)
+	day1 = int(day1)
+
+	a = date(year, month, day)
+	b = date(year1, month1, day1)
+
+	newlist = []
+	newlist1 = []
+	newlist2 = []
+	
+	for dt in rrule(DAILY, dtstart=a, until=b):
+		i= dt.strftime("%Y-%-m-%-d")
+		newlist2.append(i)
+
+		query = '''
+				SELECT  dates, cell, RH FROM %s WHERE dates = "%s" ;
+				''' % (table,i)
+					
+		df = pd.read_sql_query(query, cnx)
+					
+		tacka = '''SELECT id, lon, lat,country,altitude FROM %s;''' % 'grid'
+		grid = pd.read_sql_query(tacka, cnx)
+					
+		lon_n = grid['lon'].values
+		lat_n = grid['lat'].values
+		RH = df['RH'].values
+			
+		x_masked, y_masked, RH_p = remove_nan_observations(lon_n, lat_n, RH)
+			
+		lon = float(lon)
+		lat =float(lat)				
+		xy = np.vstack([x_masked,y_masked]).T
+		xi = np.vstack([lon,lat]).T
+
+			
+		if inter == "linear":
+			inter_point = interpolate_to_points(xy,RH_p,xi, interp_type='linear')
+		elif inter == "cressman":
+			inter_point =interpolate_to_points(xy,RH_p,xi, interp_type='cressman', minimum_neighbors=3,
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
+		elif inter == "barnes":
+			inter_point =interpolate_to_points(xy,RH_p,xi, interp_type='cressman', minimum_neighbors=3,
+						  gamma=0.25, kappa_star=5.052, search_radius=None, rbf_func='linear',
+						  rbf_smooth=0)
+
+		for y in inter_point:
+			newlist.append(y)
+		for z in xi:
+			newlist1.append(z)
+
+
+	xi =str(xi)
+	newlist_fix = [str(a) for a in newlist]
+	d = {'Year-Month-Day':newlist2,'Lon&Lat':newlist1,'Relative humidity':newlist_fix}
 	df = pd.DataFrame(d)
 
 	return (df)

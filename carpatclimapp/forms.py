@@ -132,8 +132,8 @@ class PeriodYearlyForm(forms.Form):
 class PeriodMonthlyForm(forms.Form):
 	#field1 = forms.DateField(widget=SelectDateWidget(empty_label=("Choose Year", "Choose Month", "Choose Day")))
 	#field1 = forms.DateField(widget=SelectDateWidget(empty_label="Nothing"))
+	var = forms.ChoiceField(choices=MY_VARIABLE1,label="Variable")
 	inter = forms.ChoiceField( choices = MY_CHOICES,label="Interpolation", initial='', widget=forms.Select(), required=True )
-	var = forms.ChoiceField(choices=MY_VARIABLE,label="Variable")
 	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961,label="Start Year")
 	month = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1,label="Start Month")
 	year1 = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961,label="End Year")
@@ -144,7 +144,7 @@ class PeriodMonthlyForm(forms.Form):
 
 class PeriodDailyForm(forms.Form):
 
-	var = forms.ChoiceField(choices=MY_VARIABLE,label="Variable")
+	var = forms.ChoiceField(choices=MY_VARIABLE1,label="Variable")
 	inter = forms.ChoiceField( choices = MY_CHOICES,label="Interpolation", initial='', widget=forms.Select(), required=True )
 	year = forms.ChoiceField(choices=[(x, x) for x in range(1961, 2011)], initial=1961,label="Start Year")
 	month = forms.ChoiceField(choices=[(x, x) for x in range(1, 13)], initial=1,label="Start Month")
